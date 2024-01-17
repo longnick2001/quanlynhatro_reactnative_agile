@@ -31,7 +31,7 @@ export default function LoginScreen() {
                 <TextInput placeholder='Password' placeholderTextColor={'gray'} secureTextEntry/>
             </View>
             <View className='w-full'>
-                <TouchableOpacity className='w-full bg-sky-400 p-3 rounded-2xl mb-3' onPress={()=> navigation.push("TabButton")}>
+                <TouchableOpacity className='w-full bg-sky-400 p-3 rounded-2xl mb-3' onPress={()=> navigation.push("DrawerNavigator")}>
                     <Text className='text-xl font-bold text-white text-center'>Login</Text>
                 </TouchableOpacity>
             </View>
