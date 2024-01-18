@@ -10,7 +10,6 @@ const Profile = () => {
   const handleBackPress = () => {
     navigation.goBack();
   };
-
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}

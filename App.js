@@ -20,7 +20,6 @@ import TabNavigator from './screens/TabNavigator';
 import Bill from './screens/Bill';
 import Room from './screens/Room';
 import RoomList from './screens/RoomList';
-import Search from './screens/Search';
 import HomePage from './screens/HomePage';
 
 
@@ -46,7 +45,6 @@ function App() {
           <Stack.Screen name="Bill" component={Bill} />
           <Stack.Screen name="Room" component={Room} />
           <Stack.Screen name="RoomList" component={RoomList} />
-          <Stack.Screen name="Search" component={Search} />
           <Stack.Screen name="HomePage" component={HomePage} />
           <Stack.Screen name="DrawerNavigator" component={DrawerNavigator} />
         </Stack.Navigator>

@@ -4,7 +4,6 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from 'react-native-vector-icons';
 import HomePage from './HomePage';
 import Room from './Room';
-import Search from './Search';
 import RoomList from './RoomList';
 import Bill from './Bill';
 import Icon from "react-native-vector-icons/Ionicons";
@@ -26,8 +25,6 @@ export default function TabNavigator(props) {
           iconName = focused ? 'home' : 'home-outline';
         } else if (route.name === 'Room') {
           iconName = focused ? 'add-circle' : 'add-circle-outline';
-        } else if (route.name === 'Search') {
-          iconName = focused ? 'search' : 'search-outline';
         } else if (route.name === 'RoomList') {
           iconName = focused ? 'list' : 'list-outline';
         } else if (route.name === 'Bill') {
@@ -60,20 +57,6 @@ export default function TabNavigator(props) {
         options={{
           tabBarLabel: "Phòng",
           title: "Phòng",
-          headerShown: true,
-          // tabBarButton: props => (<CustomTabBarButton route="feed" {...props} />),
-          headerLeft: () => {
-            return (
-              <TouchableOpacity style={{ paddingLeft: 10 }} onPress={() => navigation.openDrawer()}>
-                <Icon name={Platform.OS === 'ios' ? 'ios-menu' : 'md-menu'} size={30} color={'#222'} style={{ marginRight: 10 }} />
-              </TouchableOpacity>
-            )
-          }
-        }} />
-      <Tab.Screen name="Search" component={Search}
-        options={{
-          tabBarLabel: "Tìm kiếm",
-          title: "Tìm kiếm",
           headerShown: true,
           // tabBarButton: props => (<CustomTabBarButton route="feed" {...props} />),
           headerLeft: () => {
