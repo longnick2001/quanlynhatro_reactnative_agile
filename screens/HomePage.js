@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-export default function HomePage() {
+export default function HomePage({route}) {
+  const [user, setUser] = useState(route.params.user);
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerText}>Xin chào, User!</Text>
+        <Text style={styles.headerText}>Xin chào, {user.name}!</Text>
       </View>
       <Image source={require('../assets/images/background.png')} style={styles.backgroundImage} />
 

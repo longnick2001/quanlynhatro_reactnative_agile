@@ -1,6 +1,5 @@
 import { View, Text, Button } from "react-native";
 import React from "react";
-import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { collection, addDoc } from "firebase/firestore";
 import { app } from "./firebaseConfig";
@@ -12,7 +11,7 @@ const senDataToFirebase = async () => {
 
   try {
     const docRef = await addDoc(collection(db, "users"), {
-      first: "Huy",
+      first: "lón",
       last: "Le Van",
       age: 22,
     });
