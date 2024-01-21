@@ -155,7 +155,7 @@ const Profile = ({ route }) => {
             disabled={!isEditing}
           >
             <Text style={{ marginTop: 8, fontWeight: "bold" }}>
-              {formatDate(new Date(user.dob ? JSON.parse(user.dob) : "00-00-00"))}
+              {formatDate(new Date(user.dob ? JSON.parse(user.dob) : new Date()))}
             </Text>
           </TouchableOpacity>
           {showDatePicker && (

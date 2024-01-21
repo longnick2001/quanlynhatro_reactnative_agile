@@ -6,7 +6,6 @@ import { app } from "./firebaseConfig";
 
 export default function Room({ route }) {
   const [rooms, setRooms] = useState([]);
-  console.log('route.params.userId: ' + route.params.userId[0])
   const userId = route.params.userId[0];
 
   React.useEffect(() => {
