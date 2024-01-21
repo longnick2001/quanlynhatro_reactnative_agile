@@ -30,7 +30,7 @@ const DrawerNavigator = ({ route }) => {
                 },
             }}>
 
-            <Drawer.Screen name={"Home Drawer"} initialParams={{ params: 'feed', user: user, userId: route.params.userId }} component={TabNavigator} options={{
+            <Drawer.Screen name={"Home Drawer"} initialParams={{ params: 'feed', user: user, userId: userId }} component={TabNavigator} options={{
                 title: "TT chung",
                 drawerIcon: ({ focused, color, size }) => (
                     <Icon name="home-sharp" size={18} color={color} />

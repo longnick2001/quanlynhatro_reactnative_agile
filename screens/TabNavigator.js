@@ -53,7 +53,7 @@ export default function TabNavigator({route}) {
             )
           }
         }} />
-      <Tab.Screen name="Room" component={Room}
+      <Tab.Screen name="Room" component={Room} initialParams={{ userId: route.params.userId }}
         options={{
           tabBarLabel: "Phòng",
           title: "Phòng",
@@ -67,9 +67,9 @@ export default function TabNavigator({route}) {
             )
           }
         }} />
-      <Tab.Screen name="RoomList" component={RoomList}
+      <Tab.Screen name="RoomList" component={RoomList} initialParams={{ userId: route.params.userId }}
         options={{
-          tabBarLabel: "Danh sách thuê",
+          tabBarLabel: "Danh sách người thuê",
           title: "Danh sách thuê",
           headerShown: true,
           // tabBarButton: props => (<CustomTabBarButton route="feed" {...props} />),
@@ -81,7 +81,7 @@ export default function TabNavigator({route}) {
             )
           }
         }} />
-      <Tab.Screen name="Bill" component={Bill}
+      <Tab.Screen name="Bill" component={Bill} initialParams={{ userId: route.params.userId }}
         options={{
           tabBarLabel: "Hóa đơn",
           title: "Hóa Đơn",
