@@ -15,7 +15,7 @@ Icon.loadFont();
 const Tab = createBottomTabNavigator();
 export default function TabNavigator({route}) {
   const navigation = useNavigation();
-  // console.log("navigation", props)
+  console.log("navigation", route.params.userId)
   return (
     <Tab.Navigator screenOptions={({ route }) => ({
       tabBarIcon: ({ focused, color, size }) => {
@@ -39,7 +39,7 @@ export default function TabNavigator({route}) {
       }}
     >
 
-      <Tab.Screen name="Home" component={HomePage} initialParams={{ user: route.params.user }}
+      <Tab.Screen name="Home" component={HomePage} initialParams={{ user: route.params.user, userId: route.params.userId }}
         options={{
           tabBarLabel: "TT chung",
           title: "TT chung",

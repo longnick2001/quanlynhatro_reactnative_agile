@@ -17,6 +17,7 @@ const DrawerNavigator = ({ route }) => {
     const [user, setUser] = useState(route.params.user)
     //userId - phải lấy từ userId[0]
     const userId = useState(route.params.userId);
+    console.log('userId: '+route.params.userId)
     return (
         <Drawer.Navigator
             drawerContent={props => <CustomDrawer {...props} />}
@@ -29,14 +30,14 @@ const DrawerNavigator = ({ route }) => {
                 },
             }}>
 
-            <Drawer.Screen name={"Home Drawer"} initialParams={{ params: 'feed', user: user }} component={TabNavigator} options={{
+            <Drawer.Screen name={"Home Drawer"} initialParams={{ params: 'feed', user: user, userId: route.params.userId }} component={TabNavigator} options={{
                 title: "TT chung",
                 drawerIcon: ({ focused, color, size }) => (
                     <Icon name="home-sharp" size={18} color={color} />
                 )
             }} />
 
-            <Drawer.Screen name={"Profile"} initialParams={{ params: 'Profile', user: user }} component={Profile} options={{
+            <Drawer.Screen name={"Profile"} initialParams={{ params: 'Profile', user: user, userId: route.params.userId  }} component={Profile} options={{
                 title: "Profile",
                 drawerIcon: ({ focused, color, size }) => (
                     <Icon name="ios-person-circle-sharp" size={18} color={color} />

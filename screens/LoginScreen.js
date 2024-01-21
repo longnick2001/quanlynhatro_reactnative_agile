@@ -36,6 +36,7 @@ export default function LoginScreen() {
         if (user.email === doc.data().email && user.pass === doc.data().pass) {
           alert('Đăng nhập thành công');
           navigation.push('DrawerNavigator',{user: doc.data(), userId: doc.id})
+          console.log('loooooooo: '+doc.id)
           isValid = true;
         }
       });
