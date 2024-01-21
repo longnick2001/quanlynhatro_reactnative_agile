@@ -55,7 +55,6 @@ export default function SignupScreen() {
         dob: '',
         image: ''
       });
-      console.log("Thêm TK thành công: ", docRef.id);
       navigation.push('Login')
     } catch (e) {
       console.error("Error adding document: ", e);

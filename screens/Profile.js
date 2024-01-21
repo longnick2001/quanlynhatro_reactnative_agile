@@ -20,9 +20,7 @@ import { app } from "./firebaseConfig";
 const Profile = ({ route }) => {
   const [user, setUser] = useState(route.params.user);
   const [userId, setUserId] = useState(route.params.userId);
-  console.log("UserId: " + route.params.userId);
 
-  console.log("profile: " + user.dob);
   const [image, setImage] = useState("");
   const [isEditing, setEditing] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -72,7 +70,6 @@ const Profile = ({ route }) => {
   };
 
   const updateUserDatas = async () => {
-    console.log("logggggggggggg", userId);
     const userRef = doc(getFirestore(app), "users", userId);
 
     try {

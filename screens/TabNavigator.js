@@ -15,7 +15,6 @@ Icon.loadFont();
 const Tab = createBottomTabNavigator();
 export default function TabNavigator({route}) {
   const navigation = useNavigation();
-  console.log("navigation", route.params.userId)
   return (
     <Tab.Navigator screenOptions={({ route }) => ({
       tabBarIcon: ({ focused, color, size }) => {
