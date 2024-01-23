@@ -16,6 +16,8 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import * as ImagePicker from "expo-image-picker";
 import { getFirestore, doc, updateDoc } from "firebase/firestore";
 import { app } from "./firebaseConfig";
+import { options } from "yargs";
+import { base64 } from "@firebase/util";
 
 const Profile = ({ route }) => {
   const [user, setUser] = useState(route.params.user);
@@ -41,15 +43,15 @@ const Profile = ({ route }) => {
     }
   };
   const formatDate = (date) => {
-    
-      const day = date.getDate();
-      const month = date.getMonth() + 1;
-      const year = date.getFullYear();
-      return `${day < 10 ? "0" : ""}${day}-${
-        month < 10 ? "0" : ""
+
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+    return `${day < 10 ? "0" : ""}${day}-${month < 10 ? "0" : ""
       }${month}-${year}`;
 
   };
+
 
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
@@ -60,10 +62,11 @@ const Profile = ({ route }) => {
       quality: 1,
     });
     if (!result.cancelled) {
-      setUser({ ...user, image: result.uri });
+      setUser({ ...user, image:  result.uri});
+      console.log('base64: '+result.uri.base64);
     }
 
-    console.log(result);
+    
     if (!result.canceled) {
       setImage(result.assets[0].uri);
     }
