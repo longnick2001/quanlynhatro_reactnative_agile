@@ -1,15 +1,17 @@
-import { View, Text, Button, ScrollView, StyleSheet, Image, TouchableOpacity, Modal, TextInput, FlatList } from "react-native";
+import { View, Text, Button, ScrollView, StyleSheet, Image, TouchableOpacity, Modal, TextInput } from "react-native";
 import React, { useEffect, useState } from "react";
 import { getFirestore } from "firebase/firestore";
 import { collection, addDoc, getDocs } from "firebase/firestore";
 import { app } from "./firebaseConfig";
+import * as ImagePicker from "expo-image-picker";
+import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 export default function Room({ route }) {
   const [rooms, setRooms] = useState([]);
   const userId = route.params.userId[0];
   const [searchText, setSearchText] = useState('');
-
+  const navigation = useNavigation();
   React.useEffect(() => {
     const fetchRooms = async () => {
       const db = getFirestore(app);
@@ -17,9 +19,10 @@ export default function Room({ route }) {
       const querySnapshot = await getDocs(roomCollection);
       const roomList = [];
       querySnapshot.forEach((doc) => {
-        if(doc.data().userid === userId){
+        if (doc.data().userid === userId) {
           roomList.push(doc.data());
         }
+
       });
       setRooms(roomList);
     };
@@ -27,18 +30,20 @@ export default function Room({ route }) {
     fetchRooms();
   }, []);
 
-  // Thêm hàm xử lý tìm kiếm
-  const filterRooms = (text) => {
+   // Thêm hàm xử lý tìm kiếm
+   const filterRooms = (text) => {
     const filteredRooms = rooms.filter(
       (room) => room.tenphong.toLowerCase().includes(text.toLowerCase())
     );
     return filteredRooms;
   };
 
+
   //thêm phòng
+  const defaultImage = require('../assets/images/background.png');
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [newRoom, setNewRoom] = useState({
-    anhphong:'',
+    anhphong: '',
     tenphong: '',
     giaphong: '',
     dientich: '',
@@ -50,6 +55,16 @@ export default function Room({ route }) {
 
   const toggleModal = () => {
     setIsModalVisible(!isModalVisible);
+    setNewRoom({
+      anhphong: '',
+      tenphong: '',
+      giaphong: '',
+      dientich: '',
+      mota: '',
+      soluongtoida: 0,
+      userid: userId,
+      thanhvien: [],
+    })
   };
 
   //hàm xử lý đưa dữ liệu lên firebase
@@ -70,10 +85,36 @@ export default function Room({ route }) {
     senDataToFirebase(newRoom);
     // Đóng dialog
     setIsModalVisible(false);
+    setNewRoom({
+      anhphong: '',
+      tenphong: '',
+      giaphong: '',
+      dientich: '',
+      mota: '',
+      soluongtoida: 0,
+      userid: userId,
+      thanhvien: [],
+    })
+  };
+
+  const pickImage = async () => {
+    // No permissions request is necessary for launching the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+    if (!result.canceled) {
+      setNewRoom({ ...newRoom, anhphong: result.assets[0].uri });
+      console.log('base64: ' + result.assets[0].uri);
+      // setImage(result.assets[0].uri);
+    }
   };
   return (
+
     <View style={styles.container}>
-       <View style={styles.searchContainer}>
+      <View style={styles.searchContainer}>
         <Icon name="search" size={20} color="#555" style={styles.searchIcon} />
         <TextInput
           style={styles.input}
@@ -82,10 +123,11 @@ export default function Room({ route }) {
           onChangeText={text => setSearchText(text)}
         />
       </View>
+
       <ScrollView style={{ width: '100%' }}>
         <View>
           {filterRooms(searchText).map((room, index) => (
-            <View key={index} style={styles.roomItem}>
+            <TouchableOpacity key={index} style={styles.roomItem} onPress={()=>{navigation.navigate('RoomDetail', {data: room})}}>
               <View style={styles.roomDetails}>
                 <Text style={[styles.roomInfo, { fontSize: 20 }]}>{room.tenphong}</Text>
                 <Text style={styles.roomInfo}>Giá: {room.giaphong}</Text>
@@ -94,9 +136,9 @@ export default function Room({ route }) {
               </View>
               <View style={styles.roomImageContainer}>
                 {/* Hiển thị ảnh của phòng */}
-                <Image source={require('../assets/images/background.png')} style={styles.roomImage} />
+                <Image source={room.anhphong ? { uri: room.anhphong } : require('../assets/images/background.png')} style={styles.roomImage} />
               </View>
-            </View>
+            </TouchableOpacity>
           ))}
         </View>
       </ScrollView>
@@ -107,8 +149,8 @@ export default function Room({ route }) {
       <Modal visible={isModalVisible} animationType="slide">
         <View style={styles.modalContainer}>
           <Text style={styles.modalTitle}>Thêm Phòng</Text>
-          <TouchableOpacity>
-            <Image source={require('../assets/images/background.png')} style={{ width: 200, height: 120 }} />
+          <TouchableOpacity onPress={pickImage}>
+            <Image source={newRoom.anhphong ? { uri: newRoom.anhphong } : defaultImage} style={{ width: 200, height: 120 }} />
           </TouchableOpacity>
           <TextInput
             style={styles.input}
@@ -169,14 +211,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 5,
-    flexDirection: 'row'
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   roomImageContainer: {
     marginRight: 10,
   },
   roomImage: {
-    width: 100,
-    height: 100,
+    width: 160,
+    height: 120,
     borderRadius: 5,
   },
   roomDetails: {
@@ -233,7 +277,22 @@ const styles = StyleSheet.create({
     paddingLeft: 30,
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 10,
+    borderRadius: 5,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  modalButton: {
+    backgroundColor: '#10DEDE', // Màu nền của nút
+    padding: 10, // Khoảng cách giữa nút và kích thước nút
+    borderRadius: 8, // Bo góc của nút
+    margin:10
+  },
+  modalButtonText: {
+    color: 'white', // Màu chữ của nút
+    textAlign: 'center', // Căn giữa nội dung của nút
+    fontWeight:'bold'
   },
   searchContainer: {
     flexDirection: 'row',
@@ -245,4 +304,5 @@ const styles = StyleSheet.create({
     left: 5,
     zIndex: 1,
   },
+
 });

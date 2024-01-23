@@ -17,7 +17,6 @@ const DrawerNavigator = ({ route }) => {
     const [user, setUser] = useState(route.params.user)
     //userId - phải lấy từ userId[0]
     const userId = useState(route.params.userId);
-    console.log('userId: '+route.params.userId)
     return (
         <Drawer.Navigator
             drawerContent={props => <CustomDrawer {...props} />}

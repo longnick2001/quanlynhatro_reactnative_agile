@@ -17,12 +17,11 @@ import * as ImagePicker from "expo-image-picker";
 import { getFirestore, doc, updateDoc } from "firebase/firestore";
 import { app } from "./firebaseConfig";
 
+
 const Profile = ({ route }) => {
   const [user, setUser] = useState(route.params.user);
   const [userId, setUserId] = useState(route.params.userId);
-  console.log("UserId: " + route.params.userId);
 
-  console.log("profile: " + user.dob);
   const [image, setImage] = useState("");
   const [isEditing, setEditing] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -43,15 +42,15 @@ const Profile = ({ route }) => {
     }
   };
   const formatDate = (date) => {
-    
-      const day = date.getDate();
-      const month = date.getMonth() + 1;
-      const year = date.getFullYear();
-      return `${day < 10 ? "0" : ""}${day}-${
-        month < 10 ? "0" : ""
+
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+    return `${day < 10 ? "0" : ""}${day}-${month < 10 ? "0" : ""
       }${month}-${year}`;
 
   };
+
 
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
@@ -61,18 +60,19 @@ const Profile = ({ route }) => {
       aspect: [4, 3],
       quality: 1,
     });
-    if (!result.cancelled) {
-      setUser({ ...user, image: result.uri });
-    }
-
-    console.log(result);
     if (!result.canceled) {
+      setUser({ ...user, image:  result.uri});
+      // console.log('base64: '+result.uri.base64);
       setImage(result.assets[0].uri);
     }
+
+    
+    // if (!result.canceled) {
+    //   setImage(result.assets[0].uri);
+    // }
   };
 
   const updateUserDatas = async () => {
-    console.log("logggggggggggg", userId);
     const userRef = doc(getFirestore(app), "users", userId);
 
     try {
@@ -160,7 +160,7 @@ const Profile = ({ route }) => {
           </TouchableOpacity>
           {showDatePicker && (
             <DateTimePicker
-              value={new Date(user.dob ? JSON.parse(user.dob) : "00-00-00")}
+              value={new Date(user.dob ? JSON.parse(user.dob) : new Date())}
               mode="date"
               display="spinner" // Chọn kiểu hiển thị là spinner
               onChange={handleDateChange}
