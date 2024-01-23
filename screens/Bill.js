@@ -25,7 +25,7 @@ export default function Bill({ route }) {
           const docSnap = await getDoc(docRef);
 
           if (docSnap.exists()) {
-            console.log("Document data:", docSnap.data());
+            // console.log("Document data:", docSnap.data());
             setRoom(docSnap.data())
           } else {
             // docSnap.data() will be undefined in this case

@@ -16,8 +16,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import * as ImagePicker from "expo-image-picker";
 import { getFirestore, doc, updateDoc } from "firebase/firestore";
 import { app } from "./firebaseConfig";
-import { options } from "yargs";
-import { base64 } from "@firebase/util";
+
 
 const Profile = ({ route }) => {
   const [user, setUser] = useState(route.params.user);
@@ -61,15 +60,16 @@ const Profile = ({ route }) => {
       aspect: [4, 3],
       quality: 1,
     });
-    if (!result.cancelled) {
+    if (!result.canceled) {
       setUser({ ...user, image:  result.uri});
-      console.log('base64: '+result.uri.base64);
+      // console.log('base64: '+result.uri.base64);
+      setImage(result.assets[0].uri);
     }
 
     
-    if (!result.canceled) {
-      setImage(result.assets[0].uri);
-    }
+    // if (!result.canceled) {
+    //   setImage(result.assets[0].uri);
+    // }
   };
 
   const updateUserDatas = async () => {
@@ -160,7 +160,7 @@ const Profile = ({ route }) => {
           </TouchableOpacity>
           {showDatePicker && (
             <DateTimePicker
-              value={new Date(user.dob ? JSON.parse(user.dob) : "00-00-00")}
+              value={new Date(user.dob ? JSON.parse(user.dob) : new Date())}
               mode="date"
               display="spinner" // Chọn kiểu hiển thị là spinner
               onChange={handleDateChange}

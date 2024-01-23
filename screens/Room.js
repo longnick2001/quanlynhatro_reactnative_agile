@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { getFirestore } from "firebase/firestore";
 import { collection, addDoc, getDocs } from "firebase/firestore";
 import { app } from "./firebaseConfig";
+import * as ImagePicker from "expo-image-picker";
 
 export default function Room({ route }) {
   const [rooms, setRooms] = useState([]);
@@ -15,10 +16,10 @@ export default function Room({ route }) {
       const querySnapshot = await getDocs(roomCollection);
       const roomList = [];
       querySnapshot.forEach((doc) => {
-        if(doc.data().userid === userId){
+        if (doc.data().userid === userId) {
           roomList.push(doc.data());
         }
-        
+
       });
       setRooms(roomList);
     };
@@ -27,9 +28,10 @@ export default function Room({ route }) {
   }, []);
 
   //thêm phòng
+  const defaultImage = require('../assets/images/background.png');
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [newRoom, setNewRoom] = useState({
-    anhphong:'',
+    anhphong: '',
     tenphong: '',
     giaphong: '',
     dientich: '',
@@ -41,6 +43,16 @@ export default function Room({ route }) {
 
   const toggleModal = () => {
     setIsModalVisible(!isModalVisible);
+    setNewRoom({
+      anhphong: '',
+      tenphong: '',
+      giaphong: '',
+      dientich: '',
+      mota: '',
+      soluongtoida: 0,
+      userid: userId,
+      thanhvien: [],
+    })
   };
 
   //hàm xử lý đưa dữ liệu lên firebase
@@ -61,6 +73,31 @@ export default function Room({ route }) {
     senDataToFirebase(newRoom);
     // Đóng dialog
     setIsModalVisible(false);
+    setNewRoom({
+      anhphong: '',
+      tenphong: '',
+      giaphong: '',
+      dientich: '',
+      mota: '',
+      soluongtoida: 0,
+      userid: userId,
+      thanhvien: [],
+    })
+  };
+
+  const pickImage = async () => {
+    // No permissions request is necessary for launching the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+    if (!result.canceled) {
+      setNewRoom({ ...newRoom, anhphong: result.assets[0].uri });
+      console.log('base64: ' + result.assets[0].uri);
+      // setImage(result.assets[0].uri);
+    }
   };
   return (
 
@@ -77,7 +114,7 @@ export default function Room({ route }) {
               </View>
               <View style={styles.roomImageContainer}>
                 {/* Hiển thị ảnh của phòng */}
-                <Image source={require('../assets/images/background.png')} style={styles.roomImage} />
+                <Image source={room.anhphong ? { uri: room.anhphong } : require('../assets/images/background.png')} style={styles.roomImage} />
               </View>
             </View>
           ))}
@@ -90,8 +127,8 @@ export default function Room({ route }) {
       <Modal visible={isModalVisible} animationType="slide">
         <View style={styles.modalContainer}>
           <Text style={styles.modalTitle}>Thêm Phòng</Text>
-          <TouchableOpacity>
-            <Image source={require('../assets/images/background.png')} style={{ width: 200, height: 120 }} />
+          <TouchableOpacity onPress={pickImage}>
+            <Image source={newRoom.anhphong ? { uri: newRoom.anhphong } : defaultImage} style={{ width: 200, height: 120 }} />
           </TouchableOpacity>
           <TextInput
             style={styles.input}
@@ -152,14 +189,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 5,
-    flexDirection: 'row'
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   roomImageContainer: {
     marginRight: 10,
   },
   roomImage: {
-    width: 100,
-    height: 100,
+    width: 160,
+    height: 120,
     borderRadius: 5,
   },
   roomDetails: {
@@ -216,5 +255,20 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 5,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  modalButton: {
+    backgroundColor: '#10DEDE', // Màu nền của nút
+    padding: 10, // Khoảng cách giữa nút và kích thước nút
+    borderRadius: 8, // Bo góc của nút
+    margin:10
+  },
+  modalButtonText: {
+    color: 'white', // Màu chữ của nút
+    textAlign: 'center', // Căn giữa nội dung của nút
+    fontWeight:'bold'
   },
 });
