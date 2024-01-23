@@ -1,12 +1,14 @@
-import { View, Text, Button, ScrollView, StyleSheet, Image, TouchableOpacity, Modal, TextInput } from "react-native";
+import { View, Text, Button, ScrollView, StyleSheet, Image, TouchableOpacity, Modal, TextInput, FlatList } from "react-native";
 import React, { useEffect, useState } from "react";
 import { getFirestore } from "firebase/firestore";
 import { collection, addDoc, getDocs } from "firebase/firestore";
 import { app } from "./firebaseConfig";
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 export default function Room({ route }) {
   const [rooms, setRooms] = useState([]);
   const userId = route.params.userId[0];
+  const [searchText, setSearchText] = useState('');
 
   React.useEffect(() => {
     const fetchRooms = async () => {
@@ -18,13 +20,20 @@ export default function Room({ route }) {
         if(doc.data().userid === userId){
           roomList.push(doc.data());
         }
-        
       });
       setRooms(roomList);
     };
 
     fetchRooms();
   }, []);
+
+  // Thêm hàm xử lý tìm kiếm
+  const filterRooms = (text) => {
+    const filteredRooms = rooms.filter(
+      (room) => room.tenphong.toLowerCase().includes(text.toLowerCase())
+    );
+    return filteredRooms;
+  };
 
   //thêm phòng
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -63,11 +72,19 @@ export default function Room({ route }) {
     setIsModalVisible(false);
   };
   return (
-
     <View style={styles.container}>
+       <View style={styles.searchContainer}>
+        <Icon name="search" size={20} color="#555" style={styles.searchIcon} />
+        <TextInput
+          style={styles.input}
+          placeholder="Tìm kiếm theo tên"
+          value={searchText}
+          onChangeText={text => setSearchText(text)}
+        />
+      </View>
       <ScrollView style={{ width: '100%' }}>
         <View>
-          {rooms.map((room, index) => (
+          {filterRooms(searchText).map((room, index) => (
             <View key={index} style={styles.roomItem}>
               <View style={styles.roomDetails}>
                 <Text style={[styles.roomInfo, { fontSize: 20 }]}>{room.tenphong}</Text>
@@ -213,8 +230,19 @@ const styles = StyleSheet.create({
     height: 40,
     marginVertical: 10,
     padding: 10,
+    paddingLeft: 30,
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 5,
+    borderRadius: 10,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderColor: '#aaa',
+  },
+  searchIcon: {
+    position: 'absolute',
+    left: 5,
+    zIndex: 1,
   },
 });
