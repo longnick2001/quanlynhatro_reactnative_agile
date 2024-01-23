@@ -4,11 +4,12 @@ import { getFirestore } from "firebase/firestore";
 import { collection, addDoc, getDocs } from "firebase/firestore";
 import { app } from "./firebaseConfig";
 import * as ImagePicker from "expo-image-picker";
+import { useNavigation } from '@react-navigation/native';
 
 export default function Room({ route }) {
   const [rooms, setRooms] = useState([]);
   const userId = route.params.userId[0];
-
+  const navigation = useNavigation();
   React.useEffect(() => {
     const fetchRooms = async () => {
       const db = getFirestore(app);
@@ -105,7 +106,7 @@ export default function Room({ route }) {
       <ScrollView style={{ width: '100%' }}>
         <View>
           {rooms.map((room, index) => (
-            <View key={index} style={styles.roomItem}>
+            <TouchableOpacity key={index} style={styles.roomItem} onPress={()=>{navigation.navigate('RoomDetail', {data: room})}}>
               <View style={styles.roomDetails}>
                 <Text style={[styles.roomInfo, { fontSize: 20 }]}>{room.tenphong}</Text>
                 <Text style={styles.roomInfo}>Giá: {room.giaphong}</Text>
@@ -116,7 +117,7 @@ export default function Room({ route }) {
                 {/* Hiển thị ảnh của phòng */}
                 <Image source={room.anhphong ? { uri: room.anhphong } : require('../assets/images/background.png')} style={styles.roomImage} />
               </View>
-            </View>
+            </TouchableOpacity>
           ))}
         </View>
       </ScrollView>
