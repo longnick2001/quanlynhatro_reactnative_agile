@@ -83,6 +83,7 @@ export default function SignupScreen() {
 
       if (isValid) {
         senDataToFirebase(user);
+        Alert.alert('Đăng ký thành công', 'Tài khoản của bạn đã được tạo.', [{ text: 'OK' }]);
       }
     } catch (e) {
       console.error("Error getting documents: ", e);
@@ -98,14 +99,14 @@ export default function SignupScreen() {
   return (
     <View className="bg-white h-full w-full">
       <StatusBar style='light' />
-      <Image className="h-full w-full absolute" source={require('../assets/images/background.png')} />
+      <Image style={{ width: '100%', height: '80%', position: 'absolute' }} source={require('../assets/images/background.png')} />
       {/* lights */}
       <View className="flex-row justify-around w-full absolute">
-        <Image className="h-[225] w-[90]" source={require('../assets/images/light.png')} />
+        <Image className="h-[160] w-[65]" source={require('../assets/images/light.png')} />
         <Image className="h-[160] w-[65]" source={require('../assets/images/light.png')} />
       </View>
       {/* title and form */}
-      <View className="h-full w-full flex justify-around pt-48">
+      <View style={{ height: '100%', width: '100%', flex: 1, justifyContent: 'space-around', paddingTop: 100 }}>
         {/* title */}
         <View className="flex items-center">
           <Text className="text-white font-bold tracking-wider text-5xl">
@@ -119,14 +120,14 @@ export default function SignupScreen() {
             <TextInput placeholder='Username' placeholderTextColor={'gray'} value={user.name} onChangeText={handleNameChange} />
           </View>
           <View className="bg-black/5 p-5 rounded-2xl w-full">
-            {user.email == "" && <Text className="text-red font-normal">Nhập email</Text>}
-            <TextInput placeholder='Email' placeholderTextColor={'gray'} value={user.email} onChangeText={handleEmailChange} />
+            {user.email == "" && <Text className="text-red font-normal">Nhập số điện thoại</Text>}
+            <TextInput placeholder='Phone number' placeholderTextColor={'gray'} value={user.email} onChangeText={handleEmailChange} />
           </View>
           <View className="bg-black/5 p-5 rounded-2xl w-full mb-3">
             {user.pass == "" && <Text className="text-red font-normal">Nhập mật khẩu</Text>}
             <TextInput placeholder='Password' placeholderTextColor={'gray'} secureTextEntry value={user.pass} onChangeText={handlePassChange} />
           </View>
-          <View style={styles.container}>
+          {/* <View style={styles.container}>
             <TouchableOpacity
               style={selectedGender === 'male' ? styles.selectedOption : styles.option}
               onPress={() => handleGenderSelect('male')}>
@@ -137,8 +138,7 @@ export default function SignupScreen() {
               onPress={() => handleGenderSelect('female')}>
               <Text style={styles.optionText}>Nữ</Text>
             </TouchableOpacity>
-            {/* Add more gender options if needed */}
-          </View>
+          </View> */}
           <View className='w-full'>
             {user.name != '' &&
               user.email != '' &&
@@ -155,7 +155,7 @@ export default function SignupScreen() {
           <View className="flex-row justify-center">
             <Text>Already have an account?</Text>
             <TouchableOpacity onPress={() => navigation.push('Login')}>
-              <Text className="text-sky-600">Login</Text>
+              <Text className="text-sky-600"> Login</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -163,7 +163,6 @@ export default function SignupScreen() {
     </View>
   )
 }
-
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',

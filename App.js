@@ -22,6 +22,7 @@ import Room from './screens/Room';
 import RoomList from './screens/RoomList';
 import HomePage from './screens/HomePage';
 import RoomDetail from './screens/RoomDetail';
+import Profile from './screens/Profile';
 
 
 const Stack = createNativeStackNavigator();
@@ -49,6 +50,7 @@ function App() {
           <Stack.Screen name="HomePage" component={HomePage} />
           <Stack.Screen name="DrawerNavigator" component={DrawerNavigator} />
           <Stack.Screen name="RoomDetail" component={RoomDetail} />
+          <Stack.Screen name="Profile" component={Profile} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaView>

@@ -1,15 +1,50 @@
-import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
-
-export default function HomePage({route}) {
+import React, { useState } from "react";
+import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
+import FontAwesomeIcon from "react-native-vector-icons/FontAwesome";
+import Ionicons from "react-native-vector-icons/Ionicons";
+import { useNavigation } from "@react-navigation/native";
+export default function HomePage({ route }) {
   const [user, setUser] = useState(route.params.user);
+  const navigation = useNavigation();
   return (
     <View style={styles.container}>
+      <Image
+        source={require("../assets/images/background.png")}
+        style={styles.backgroundImage}
+      />
       <View style={styles.header}>
-        <Text style={styles.headerText}>Xin chào, {user.name}!</Text>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <View>
+            <Text style={{ color: "white", fontSize: 18 }}>Xin chào</Text>
+            <Text style={styles.headerText}>{user.name}</Text>
+          </View>
+          <View style={{ flexDirection: "row" }}>
+            <Ionicons
+              name="ios-person-circle-sharp"
+              size={28}
+              style={{ color: "white" }}
+              onPress={() =>
+                navigation.navigate("Profile", {
+                  params: "Profile",
+                  user: user,
+                  userId: route.params.userId,
+                })
+              }
+            />
+            <Ionicons
+              name="ios-notifications-circle"
+              size={28}
+              style={{ marginLeft: 14, color: "white" }}
+            />
+          </View>
+        </View>
       </View>
-      <Image source={require('../assets/images/background.png')} style={styles.backgroundImage} />
 
       {/* Upper overlay */}
       <View style={[styles.overlay, styles.upperOverlay]}>
@@ -32,38 +67,56 @@ export default function HomePage({route}) {
       <View style={[styles.overlay, styles.lowerOverlay]}>
         <View style={styles.column}>
           <View style={styles.infoItem}>
-            <Icon name="home" size={20} color="black" />
+            <Image
+              style={styles.iconImage}
+              source={require("../assets/images/dichvu.png")}
+            />
             <Text style={styles.infoText}>Dịch vụ</Text>
           </View>
           <View style={styles.infoItem}>
-            <Icon name="file-text-o" size={20} color="black" />
+            <Image
+              style={styles.iconImage}
+              source={require("../assets/images/hoadon.png")}
+            />
             <Text style={styles.infoText}>Hóa đơn</Text>
           </View>
         </View>
 
         <View style={styles.column}>
           <View style={styles.infoItem}>
-            <Icon name="user" size={20} color="black" />
+            <Image
+              style={styles.iconImage}
+              source={require("../assets/images/nguoi.png")}
+            />
             <Text style={styles.infoText}>Người thuê</Text>
           </View>
           <View style={styles.infoItem}>
-            <Icon name="exclamation-triangle" size={20} color="black" />
+            <Image
+              style={styles.iconImage}
+              source={require("../assets/images/suco3.png")}
+            />
             <Text style={styles.infoText}>Sự cố</Text>
           </View>
         </View>
 
         <View style={styles.column}>
           <View style={styles.infoItem}>
-            <Icon name="handshake-o" size={20} color="black" />
+            <Image
+              style={styles.iconImage}
+              source={require("../assets/images/hopdong.png")}
+            />
             <Text style={styles.infoText}>Hợp đồng</Text>
           </View>
           <View style={styles.infoItem}>
-            <Icon name="handshake-o" size={20} color="black" />
+            <Image
+              style={styles.iconImage}
+              source={require("../assets/images/chotdv1.png")}
+            />
             <Text style={styles.infoText}>Chốt dịch vụ</Text>
           </View>
         </View>
       </View>
-      </View>
+    </View>
   );
 }
 
@@ -72,39 +125,39 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    backgroundColor: '#3498db', // A color for the header background
-    padding: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
+    width:'100%',
+    position: "absolute",
+    padding:'5%',
+    top:'5%'
   },
   headerText: {
-    color: 'white',
-    fontSize: 24,
-    fontWeight: 'bold',
+    color: "white",
+    fontSize: 20,
+    fontWeight: "bold",
   },
   backgroundImage: {
-    width: '100%',
-    height: '80%',
-    resizeMode: 'cover',
+    width: "100%",
+    height: "110%",
+    resizeMode: "cover",
   },
   overlay: {
-    position: 'absolute',
-    flexDirection: 'row', // Display children in a row
+    position: "absolute",
+    flexDirection: "row", // Display children in a row
     left: 16,
     right: 16,
     borderRadius: 10, // Rounded corners
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 16,
   },
   upperOverlay: {
-    top: '30%',
-    backgroundColor: 'white', // Semi-transparent white background
+    top: "25%",
+    backgroundColor: "white", // Semi-transparent white background
     zIndex: 1,
   },
   lowerOverlay: {
-    bottom: '10%',
-    backgroundColor: 'rgba(255, 255, 255, 0.7)', // Semi-transparent white background
+    bottom: "10%",
+    backgroundColor: "white", // Semi-transparent white background
     zIndex: 1,
   },
   column: {
@@ -112,31 +165,38 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   overlayTitle: {
-    color: 'black',
+    color: "black",
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 10,
   },
   overlayText: {
     marginLeft: 40,
-    color: 'black',
+    color: "black",
     fontSize: 18,
-    fontWeight: 'bold'
+    fontWeight: "normal",
   },
   overlayNumber: {
-    color: 'black',
+    color: "black",
     fontSize: 18,
-    textAlign: 'center', // Center the number
+    textAlign: "center", // Center the number
   },
   infoItem: {
-    flexDirection: 'column',
-    alignItems: 'center',
+    flexDirection: "column",
+    alignItems: "center",
     marginBottom: 15,
-    marginTop: 20
+    marginTop: 10,
   },
   infoText: {
     marginLeft: 8,
     fontSize: 18,
-    color: 'black',
+    color: "black",
+  },
+  bottomAlign: {
+    alignSelf: "flex-end", // Căn dưới
+  },
+  iconImage: {
+    width: 50, // Độ rộng của ảnh
+    height: 50, // Độ cao của ảnh
   },
 });

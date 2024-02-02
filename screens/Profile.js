@@ -117,7 +117,7 @@ const Profile = ({ route }) => {
           />
         </TouchableOpacity>
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Email</Text>
+          <Text style={styles.label}>Số điện thoại</Text>
           <TextInput
             style={styles.input}
             value={user.email}

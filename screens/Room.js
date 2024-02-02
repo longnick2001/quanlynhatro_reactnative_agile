@@ -40,7 +40,7 @@ export default function Room({ route }) {
 
 
   //thêm phòng
-  const defaultImage = require('../assets/images/background.png');
+  const defaultImage = require('../assets/images/phongtro.png');
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [newRoom, setNewRoom] = useState({
     anhphong: '',
@@ -111,6 +111,30 @@ export default function Room({ route }) {
       // setImage(result.assets[0].uri);
     }
   };
+  const renderIcons = (room) => {
+    return (
+      <View style={styles.iconContainer}>
+        <Image style={styles.iconImage} source={require('../assets/images/phongtro.png')}/>
+        <Text style={{color: 'green', fontWeight:'bold', fontSize: 20}}>{room.tenphong}</Text>
+        <Text style={styles.iconText}>{room.giaphong}</Text>
+        <View style={styles.horizontalIcons}>
+          <View style={styles.roomview}>
+          <Icon name="user" size={20} color="#555" style={styles.icon} />
+          <Text style={{ marginTop: 3, fontWeight: 'bold'}}>0</Text>
+          </View>
+          <View style={styles.roomview}>
+          <Icon name="dollar" size={20} color="#555" style={styles.icon} />
+          <Text style={{ marginTop: 3, fontWeight: 'bold'}}>0</Text>
+          </View>
+          <View style={styles.roomview}>
+          <Icon name="exclamation-circle" size={20} color="#555" style={styles.icon} />
+          <Text style={{ marginTop: 3, fontWeight: 'bold'}}>0</Text>
+          </View>
+          
+        </View>
+      </View>
+    );
+  };
   return (
 
     <View style={styles.container}>
@@ -125,18 +149,22 @@ export default function Room({ route }) {
       </View>
 
       <ScrollView style={{ width: '100%' }}>
-        <View>
+        <View style={styles.roomList}>
           {filterRooms(searchText).map((room, index) => (
-            <TouchableOpacity key={index} style={styles.roomItem} onPress={()=>{navigation.navigate('RoomDetail', {data: room})}}>
-              <View style={styles.roomDetails}>
-                <Text style={[styles.roomInfo, { fontSize: 20 }]}>{room.tenphong}</Text>
-                <Text style={styles.roomInfo}>Giá: {room.giaphong}</Text>
-                <Text style={styles.roomInfo}>Diện tích: {room.dientich}</Text>
-                <Text style={styles.roomInfo}>Mô tả: {room.mota}</Text>
-              </View>
+            <TouchableOpacity
+              key={index}
+              style={styles.roomItem}
+              onPress={() => {
+                navigation.navigate('RoomDetail', { data: room });
+              }}
+            >
               <View style={styles.roomImageContainer}>
                 {/* Hiển thị ảnh của phòng */}
-                <Image source={room.anhphong ? { uri: room.anhphong } : require('../assets/images/background.png')} style={styles.roomImage} />
+                {/* <Image
+                  source={room.anhphong ? { uri: room.anhphong } : require('../assets/images/background.png')}
+                  style={styles.roomImage}
+                /> */}
+                {renderIcons(room)}
               </View>
             </TouchableOpacity>
           ))}
@@ -150,7 +178,7 @@ export default function Room({ route }) {
         <View style={styles.modalContainer}>
           <Text style={styles.modalTitle}>Thêm Phòng</Text>
           <TouchableOpacity onPress={pickImage}>
-            <Image source={newRoom.anhphong ? { uri: newRoom.anhphong } : defaultImage} style={{ width: 200, height: 120 }} />
+            <Image source={newRoom.anhphong ? { uri: newRoom.anhphong } : defaultImage} style={{ width: 100, height: 100 }} />
           </TouchableOpacity>
           <TextInput
             style={styles.input}
@@ -204,19 +232,44 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center'
   },
-  roomItem: {
-    width: '100%',
+  roomList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
     padding: 10,
-    margin: 5,
+  },
+  roomItem: {
+    width: '48%',
+    marginBottom: 10,
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 5,
     flexDirection: 'row',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+  },
+  iconContainer: {
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  icon: {
+    marginRight: 5,
+  },
+  iconText: {
+    fontSize: 16,
+    color: '#555',
   },
   roomImageContainer: {
-    marginRight: 10,
+  backgroundColor: 'white',
+  borderRadius: 5,
+  shadowColor: '#000',
+  shadowOffset: {
+    width: 0,
+    height: 2,
+  },
+  shadowOpacity: 0.25,
+  shadowRadius: 3.84,
+  elevation: 5,
   },
   roomImage: {
     width: 160,
@@ -304,5 +357,19 @@ const styles = StyleSheet.create({
     left: 5,
     zIndex: 1,
   },
-
+  horizontalIcons: {
+    flexDirection: 'row',
+    marginTop: 5,
+    alignItems: 'center',
+  },
+  roomview:
+  {flexDirection: 'row', 
+  paddingLeft: 25, 
+  paddingRight: 16,
+  marginBottom: 10
+},
+iconImage: {
+  width: 100, // Độ rộng của ảnh
+  height: 100, // Độ cao của ảnh
+},
 });

@@ -68,7 +68,7 @@ export default function TabNavigator({route}) {
         }} />
       <Tab.Screen name="RoomList" component={RoomList} initialParams={{ userId: route.params.userId }}
         options={{
-          tabBarLabel: "Danh sách người thuê",
+          tabBarLabel: "Người thuê",
           title: "Danh sách thuê",
           headerShown: true,
           // tabBarButton: props => (<CustomTabBarButton route="feed" {...props} />),

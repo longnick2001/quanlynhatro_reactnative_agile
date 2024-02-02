@@ -71,8 +71,8 @@ export default function LoginScreen() {
         {/* form */}
         <View className="flex items-center mx-4 space-y-4">
           <View className="bg-black/5 p-5 rounded-2xl w-full">
-            {user.email == "" && <Text className="text-red font-normal">Nhập email</Text>}
-            <TextInput placeholder='Email' placeholderTextColor={'gray'} value={user.email} onChangeText={handleEmailChange} />
+            {user.email == "" && <Text className="text-red font-normal">Nhập số điện thoại</Text>}
+            <TextInput placeholder='Phone number' placeholderTextColor={'gray'} value={user.email} onChangeText={handleEmailChange} />
           </View>
           <View className="bg-black/5 p-5 rounded-2xl w-full mb-3">
             {user.pass == "" && <Text className="text-red font-normal">Nhập mật khẩu</Text>}
@@ -90,7 +90,7 @@ export default function LoginScreen() {
           <View className="flex-row justify-center">
             <Text>Don't have an account?</Text>
             <TouchableOpacity onPress={() => navigation.push('Signup')}>
-              <Text className="text-sky-600">SignUp</Text>
+              <Text className="text-sky-600"> SignUp</Text>
             </TouchableOpacity>
           </View>
         </View>
