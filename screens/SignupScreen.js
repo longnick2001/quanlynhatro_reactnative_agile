@@ -19,7 +19,7 @@ export default function SignupScreen() {
   const [user, setUser] = useState({
     name: '',
     pass: '',
-    email: '',
+    phone: '',
     gender: ''
   });
 
@@ -29,7 +29,7 @@ export default function SignupScreen() {
   };
   // Hàm xử lý khi thay đổi giá trị của trường name
   const handleEmailChange = (value) => {
-    setUser({ ...user, email: value });
+    setUser({ ...user, phone: value });
   };
   // Hàm xử lý khi thay đổi giá trị của trường pass
   const handlePassChange = (value) => {
@@ -49,7 +49,7 @@ export default function SignupScreen() {
     try {
       const docRef = await addDoc(collection(db, "users"), {
         name: user.name,
-        email: user.email,
+        phone: user.phone,
         pass: user.pass,
         gender: user.gender,
         dob: '',
@@ -68,12 +68,12 @@ export default function SignupScreen() {
     try {
       const querySnapshot = await getDocs(usersCollection);
       querySnapshot.forEach((doc) => {
-        if (user.name === doc.data().name && user.email === doc.data().email) {
+        if (user.name === doc.data().name && user.phone === doc.data().phone) {
           Alert.alert('Tài khoản đã tồn tại');
           setIsSignUp(false);
           setUser({
             name: '',
-            email: '',
+            phone: '',
             pass: ''
           });
           isValid = false;
@@ -120,8 +120,8 @@ export default function SignupScreen() {
             <TextInput placeholder='Username' placeholderTextColor={'gray'} value={user.name} onChangeText={handleNameChange} />
           </View>
           <View className="bg-black/5 p-5 rounded-2xl w-full">
-            {user.email == "" && <Text className="text-red font-normal">Nhập số điện thoại</Text>}
-            <TextInput placeholder='Phone number' placeholderTextColor={'gray'} value={user.email} onChangeText={handleEmailChange} />
+            {user.phone == "" && <Text className="text-red font-normal">Nhập số điện thoại</Text>}
+            <TextInput placeholder='Phone number' placeholderTextColor={'gray'} value={user.phone} onChangeText={handleEmailChange} />
           </View>
           <View className="bg-black/5 p-5 rounded-2xl w-full mb-3">
             {user.pass == "" && <Text className="text-red font-normal">Nhập mật khẩu</Text>}
@@ -141,7 +141,7 @@ export default function SignupScreen() {
           </View> */}
           <View className='w-full'>
             {user.name != '' &&
-              user.email != '' &&
+              user.phone != '' &&
               user.pass != '' &&
               !isSignUp &&
               <TouchableOpacity className='w-full bg-sky-400 p-3 rounded-2xl mb-3'

@@ -13,12 +13,12 @@ export default function LoginScreen() {
   const [user, setUser] = useState({
     name: '',
     pass: '',
-    email: ''
+    phone: ''
   });
 
   // Hàm xử lý khi thay đổi giá trị của trường name
   const handleEmailChange = (value) => {
-    setUser({ ...user, email: value });
+    setUser({ ...user, phone: value });
   };
   // Hàm xử lý khi thay đổi giá trị của trường pass
   const handlePassChange = (value) => {
@@ -33,7 +33,7 @@ export default function LoginScreen() {
     try {
       const querySnapshot = await getDocs(usersCollection);
       querySnapshot.forEach((doc) => {
-        if (user.email === doc.data().email && user.pass === doc.data().pass) {
+        if (user.phone === doc.data().phone && user.pass === doc.data().pass) {
           alert('Đăng nhập thành công');
           navigation.push('DrawerNavigator',{user: doc.data(), userId: doc.id})
           // console.log('loooooooo: '+doc.id)
@@ -71,8 +71,8 @@ export default function LoginScreen() {
         {/* form */}
         <View className="flex items-center mx-4 space-y-4">
           <View className="bg-black/5 p-5 rounded-2xl w-full">
-            {user.email == "" && <Text className="text-red font-normal">Nhập số điện thoại</Text>}
-            <TextInput placeholder='Phone number' placeholderTextColor={'gray'} value={user.email} onChangeText={handleEmailChange} />
+            {user.phone == "" && <Text className="text-red font-normal">Nhập số điện thoại</Text>}
+            <TextInput placeholder='Phone number' placeholderTextColor={'gray'} value={user.phone} onChangeText={handleEmailChange} />
           </View>
           <View className="bg-black/5 p-5 rounded-2xl w-full mb-3">
             {user.pass == "" && <Text className="text-red font-normal">Nhập mật khẩu</Text>}
@@ -80,7 +80,7 @@ export default function LoginScreen() {
           </View>
           <View className='w-full'>
             {!login &&
-              user.email != '' &&
+              user.phone != '' &&
               user.pass != '' &&
               <TouchableOpacity className='w-full bg-sky-400 p-3 rounded-2xl mb-3' onPress={Login}>
                 <Text className='text-xl font-bold text-white text-center'>Login</Text>

@@ -17,7 +17,6 @@ import * as ImagePicker from "expo-image-picker";
 import { getFirestore, doc, updateDoc } from "firebase/firestore";
 import { app } from "./firebaseConfig";
 
-
 const Profile = ({ route }) => {
   const [user, setUser] = useState(route.params.user);
   const [userId, setUserId] = useState(route.params.userId);
@@ -42,15 +41,13 @@ const Profile = ({ route }) => {
     }
   };
   const formatDate = (date) => {
-
     const day = date.getDate();
     const month = date.getMonth() + 1;
     const year = date.getFullYear();
-    return `${day < 10 ? "0" : ""}${day}-${month < 10 ? "0" : ""
-      }${month}-${year}`;
-
+    return `${day < 10 ? "0" : ""}${day}-${
+      month < 10 ? "0" : ""
+    }${month}-${year}`;
   };
-
 
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
@@ -61,12 +58,11 @@ const Profile = ({ route }) => {
       quality: 1,
     });
     if (!result.canceled) {
-      setUser({ ...user, image:  result.uri});
+      setUser({ ...user, image: result.uri });
       // console.log('base64: '+result.uri.base64);
       setImage(result.assets[0].uri);
     }
 
-    
     // if (!result.canceled) {
     //   setImage(result.assets[0].uri);
     // }
@@ -109,85 +105,70 @@ const Profile = ({ route }) => {
           <Text className="text-sky-600">Sửa thông tin</Text>
         </TouchableOpacity>
       </View>
-      <View style={styles.profileHeader}>
-        <TouchableOpacity onPress={pickImage}>
-          <Image
-            source={user.image ? { uri: user.image } : defaultImage}
-            style={styles.avatar}
-          />
-        </TouchableOpacity>
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Số điện thoại</Text>
-          <TextInput
-            style={styles.input}
-            value={user.email}
-            onChangeText={handleOnChangeMail}
-            editable={isEditing}
-          />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Họ tên</Text>
+      {/* Upper overlay */}
+      <View style={[styles.overlay, styles.upperOverlay]}>
+        <View>
+          <TouchableOpacity>
+            <Image
+              source={user.image ? { uri: user.image } : defaultImage}
+              style={styles.avatar}
+            />
+          </TouchableOpacity>
           <TextInput
             style={styles.input}
             value={user.name}
             onChangeText={handleNameOnChange}
             editable={isEditing}
           />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Mật khẩu</Text>
-          <TextInput
-            style={styles.input}
-            value={user.pass}
-            onChangeText={handleOnChangePass}
-            secureTextEntry={true}
-            editable={isEditing}
-          />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Ngày sinh</Text>
-          <TouchableOpacity
-            style={styles.input}
-            onPress={() => setShowDatePicker(true)}
-            disabled={!isEditing}
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
           >
-            <Text style={{ marginTop: 8, fontWeight: "bold" }}>
-              {formatDate(new Date(user.dob ? JSON.parse(user.dob) : new Date()))}
+            <Text style={{ marginRight: 230, fontWeight: "bold" }}>
+              Số điện thoại
             </Text>
-          </TouchableOpacity>
-          {showDatePicker && (
-            <DateTimePicker
-              value={new Date(user.dob ? JSON.parse(user.dob) : new Date())}
-              mode="date"
-              display="spinner" // Chọn kiểu hiển thị là spinner
-              onChange={handleDateChange}
+            <TextInput
+              style={{ color: "black" }}
+              value={user.phone}
+              onChangeText={handleOnChangeMail}
+              editable={isEditing}
             />
-          )}
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Giới tính</Text>
-          <TextInput
-            style={styles.input}
-            value={user.gender}
-            onChangeText={handleOnChangeGender}
-            editable={isEditing}
-          />
-        </View>
-        <TouchableOpacity
-          style={styles.btn}
-          // disabled={!isEditing}
-          onPress={updateUserDatas}
-        >
-          <Text
-            style={{ textAlign: "center", fontWeight: "bold", color: "white" }}
+          </View>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
           >
-            Lưu Thông Tin
-          </Text>
-        </TouchableOpacity>
+            <Text style={{ marginRight: 230, fontWeight: "bold" }}>
+              Địa chỉ
+            </Text>
+            <TextInput
+              style={{ color: "black" }}
+              value={user.address}
+              onChangeText={handleOnChangeMail}
+              editable={isEditing}
+            />
+          </View>
+        </View>
+      </View>
+      <View style={[styles.overlay, styles.lowerOverlay]}>
+        <View style={{flexDirection: 'row', marginBottom: 10}}>
+            <Text style={{fontWeight: 'bold'}}>Gói quản lý</Text>
+            <Text style={{marginLeft: 30, fontWeight: 'bold', color:'green'}}>Cá nhân</Text>
+        </View>
+        <View style={{flexDirection: 'row', marginBottom: 10}}>
+            <Text style={{fontWeight: 'normal'}}>Ngày kích hoạt</Text>
+            <Text style={{marginLeft: 220, fontWeight: 'bold'}}>18-02-2024</Text>
+        </View>
+        <View style={{flexDirection: 'row'}}>
+            <Text style={{fontWeight: 'normal'}}>Ngày kết thúc</Text>
+            <Text style={{marginLeft: 227, fontWeight: 'bold'}}>18-03-2024</Text>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -225,6 +206,9 @@ const styles = StyleSheet.create({
     width: 150,
     height: 150,
     borderRadius: 75,
+    marginLeft: 115,
+    borderColor: 'green',
+    borderWidth: 5
   },
   name: {
     fontSize: 24,
@@ -240,18 +224,13 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   label: {
-    fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 5,
+    textAlign: "right",
   },
   input: {
-    width: 300,
-    height: 40,
-    borderColor: "gray",
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingLeft: 10,
     fontWeight: "bold",
+    color: "black",
+    textAlign: "center",
   },
   btn: {
     width: "40%",
@@ -259,6 +238,23 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 20,
     marginTop: 10,
+  },
+  overlay: {
+    position: "absolute",
+    //flexDirection: "row", // Display children in a row
+    left: 16,
+    right: 16,
+    borderRadius: 10, // Rounded corners
+    padding: 16,
+  },
+  upperOverlay: {
+    top: "15%",
+    backgroundColor: "white", // Semi-transparent white background
+  },
+  lowerOverlay: {
+    bottom: "35%",
+    backgroundColor: "white", // Semi-transparent white background
+    zIndex: 1,
   },
 });
 export default Profile;
