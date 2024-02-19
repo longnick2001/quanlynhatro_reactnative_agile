@@ -8,8 +8,7 @@ import * as ImagePicker from "expo-image-picker";
 const RoomDetail = ({ route }) => {
   const { getRoom } = route.params;
   const { roomId } = route.params;
-  const { roomid } = route.params;
-  console.log(roomid);
+  console.log(getRoom.tenphong +" - "+getRoom.roomid);
   const [nguoithue, setnguoithue] = useState({
     name:"",
     phone:"",
