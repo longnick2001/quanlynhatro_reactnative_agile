@@ -6,19 +6,26 @@ import Icon from "react-native-vector-icons/Ionicons";
 import * as ImagePicker from "expo-image-picker";
 
 const RoomDetail = ({ route }) => {
-  const { getRoom } = route.params;
+  const [getRoom, setgetRoom]= useState(route.params.getRoom);
   const { roomId } = route.params;
-  console.log(roomId);
-  const [nguoithue, setnguoithue] = useState({
-    name:"",
-    phone:"",
+  const [image, setImage] = useState("");
+  //console.log(roomId);
+  // const [nguoithue, setnguoithue] = useState({
+  //   name:"",
+  //   phone:"",
 
-  });
+  // });
   const defaultImage = require("../assets/Group.png");
   const navigation = useNavigation();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalVisibles, setIsModalVisibles] = useState(false);
+  const [isUpdate, setIsUpdate] = useState(false);
 
+
+  const isModalUpdate = () =>{
+    setIsUpdate(!isUpdate);
+    delAnh();
+  }
   const toggleModals = () => {
     setIsModalVisibles(!isModalVisibles);
     setIsModalVisible(false);
@@ -35,7 +42,7 @@ const RoomDetail = ({ route }) => {
     return price;
   };
 
-  const pickImage = async () => {
+  const pickImageUpdate = async () => {
     // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
@@ -44,8 +51,26 @@ const RoomDetail = ({ route }) => {
       quality: 1,
     });
     if (!result.canceled) {
-      //setUser({ ...user, image: result.assets[0].uri});
-      // console.log('base64: '+result.uri.base64);
+      setgetRoom({...getRoom ,anhphong: result.assets[0].uri});
+      //console.log('base64: '+result.uri.base64);
+      setImage(result.assets[0].uri);
+    }
+    // if (!result.canceled) {
+    //   setImage(result.assets[0].uri);
+    // }
+  };
+
+  const pickImageUser = async () => {
+    // No permissions request is necessary for launching the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+    if (!result.canceled) {
+      //setgetRoom({ ...getRoom, anhphong: result.assets[0].uri});
+      //console.log('base64: '+result.uri.base64);
       //setImage(result.assets[0].uri);
     }
     // if (!result.canceled) {
@@ -53,12 +78,29 @@ const RoomDetail = ({ route }) => {
     // }
   };
 
-  const handleNameOnChange = (value) => {
-    setnguoithue({ ...nguoithue, name: value });
+  const handletenPhong = (value) => {
+    setgetRoom({ ...rooms, tenphong: value });
   };
-  const handlePhoneOnChange = (value) => {
-    setnguoithue({ ...nguoithue, phone: value });
+  const handledienTich = (value) => {
+    setgetRoom({ ...rooms, dientich: value });
   };
+  const handlegiaPhong = (value) => {
+    setgetRoom({ ...rooms, giaphong: value });
+  };
+  const handlemoTa = (value) => {
+    setgetRoom({ ...rooms, mota: value });
+  };
+  const handlesoluongMax = (value) => {
+    setgetRoom({ ...rooms, soluongtoida: value });
+  };
+  const handleanhPhong = (value) => {
+    setgetRoom({ ...rooms, anhphong: image });
+  };
+
+  const delAnh = () =>{
+    setgetRoom({...getRoom, anhphong: getRoom.anhphong});
+  } 
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -66,6 +108,9 @@ const RoomDetail = ({ route }) => {
           <Icon name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
         <Text style={styles.title}>{getRoom.tenphong}</Text>
+        <TouchableOpacity style={{marginLeft:'auto'}} onPress={isModalUpdate}>
+          <Icon name="sync" size={24} color="black" />
+        </TouchableOpacity>
       </View>
       <View>
         <Image
@@ -117,7 +162,7 @@ const RoomDetail = ({ route }) => {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContents}>
-            <TouchableOpacity onPress={pickImage} style={{ marginBottom: 30 }}>
+            <TouchableOpacity onPress={pickImageUser} style={{ marginBottom: 30 }}>
               <Image
                 source={defaultImage}
                 style={styles.avatar}
@@ -133,11 +178,8 @@ const RoomDetail = ({ route }) => {
                 borderWidth: 2,
                 textAlign: "center",
               }}
-              
-              
             >
             </TextInput>
-
             <TextInput
               style={{
                 width: "100%",
@@ -190,6 +232,59 @@ const RoomDetail = ({ route }) => {
           </View>
         </View>
       </Modal>
+      {/* Dialog sửa phòng */}
+      <Modal visible={isUpdate} animationType="slide">
+        <View style={styles.modalContainerz}>
+          <Text style={styles.modalTitle}>Sửa Phòng</Text>
+          <TouchableOpacity onPress={pickImageUpdate}>
+            <Image
+              source={
+                getRoom.anhphong ? { uri: getRoom.anhphong } : defaultImage
+              }
+              style={{ width: 180, height: 130, borderRadius: 5, borderWidth: 2, borderColor:'blue' }}
+            />
+          </TouchableOpacity>
+          <TextInput
+            style={styles.input}
+            placeholder="Tên phòng"
+            value={getRoom.tenphong}
+            onChangeText={handletenPhong}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Giá phòng"
+            value={getRoom.giaphong}
+            onChangeText={handlegiaPhong}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Diện tích"
+            value={getRoom.dientich}
+            onChangeText={handledienTich}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Mô tả"
+            value={getRoom.mota}
+            onChangeText={handlemoTa}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Số lượng tối đa"
+            value={getRoom.soluongtoida}
+            keyboardType="numeric"
+            onChangeText={handlesoluongMax}
+          />
+          <View style={styles.modalButtons}>
+            <TouchableOpacity style={styles.modalButton}>
+              <Text style={styles.modalButtonText}>Lưu</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.modalButton} onPress={isModalUpdate}>
+              <Text style={styles.modalButtonText}>Hủy</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -211,10 +306,14 @@ const styles = StyleSheet.create({
   backButton: {
     marginRight: 10,
   },
+  refButton: {
+    marginRight: 10,
+    justifyContent:'space-evenly',
+  },
   title: {
     fontSize: 20,
     fontWeight: "bold",
-    textAlign: "center",
+    marginLeft: 160,
   },
   overlay: {
     position: "absolute",
@@ -266,6 +365,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "rgba(0, 0, 0, 0.5)", // opacity for the background
   },
+  modalContainerz: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   modalContents: {
     backgroundColor: "#FFF",
     padding: 20,
@@ -296,5 +400,35 @@ const styles = StyleSheet.create({
     marginLeft: 115,
     borderColor: "green",
     borderWidth: 5,
+  },
+  input: {
+    width: "80%",
+    height: 40,
+    marginVertical: 10,
+    padding: 10,
+    paddingLeft: 30,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+  },
+  modalButton: {
+    backgroundColor: "#10DEDE", // Màu nền của nút
+    padding: 10, // Khoảng cách giữa nút và kích thước nút
+    borderRadius: 8, // Bo góc của nút
+    margin: 10,
+  },
+  modalButtonText: {
+    color: "white", // Màu chữ của nút
+    textAlign: "center", // Căn giữa nội dung của nút
+    fontWeight: "bold",
   },
 });
