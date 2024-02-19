@@ -1,26 +1,39 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity,Modal, TextInput } from "react-native";
+import { StyleSheet, Text, View, Image, TouchableOpacity, Modal, TextInput } from "react-native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/Ionicons";
 import * as ImagePicker from "expo-image-picker";
+import { collection, addDoc, getDocs, getDoc, doc, updateDoc} from "firebase/firestore";
+import { getFirestore } from "firebase/firestore";
+import { app } from "./firebaseConfig";
 
 const RoomDetail = ({ route }) => {
   const { getRoom } = route.params;
-  console.log(getRoom.tenphong +" - "+getRoom.roomid);
+  const { userId } = route.params;
+  console.log(userId);
   const [nguoithue, setnguoithue] = useState({
-    name:"",
-    phone:"",
-
+    name: "",
+    phone: "",
+    gender: "",
+    image: "",
+    roomid: getRoom.roomid,
+    userid: userId
   });
   const defaultImage = require("../assets/Group.png");
   const navigation = useNavigation();
-  const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalVisibles, setIsModalVisibles] = useState(false);
 
   const toggleModals = () => {
     setIsModalVisibles(!isModalVisibles);
-    setIsModalVisible(false);
+    setnguoithue({
+      name: "",
+      phone: "",
+      gender: "",
+      image: "",
+      roomid: getRoom.roomid,
+      userid: userId
+    })
   };
   const handleBackPress = () => {
     navigation.goBack();
@@ -46,6 +59,7 @@ const RoomDetail = ({ route }) => {
       //setUser({ ...user, image: result.assets[0].uri});
       // console.log('base64: '+result.uri.base64);
       //setImage(result.assets[0].uri);
+      handleImageOnChange(result.assets[0].uri);
     }
     // if (!result.canceled) {
     //   setImage(result.assets[0].uri);
@@ -58,6 +72,43 @@ const RoomDetail = ({ route }) => {
   const handlePhoneOnChange = (value) => {
     setnguoithue({ ...nguoithue, phone: value });
   };
+  const handleGenderOnChange = (value) => {
+    setnguoithue({ ...nguoithue, gender: value });
+  };
+  const handleImageOnChange = (value) => {
+    setnguoithue({ ...nguoithue, image: value });
+  };
+
+  const [thanhvien, setThanhVien] = useState(getRoom.thanhvien);
+  const addNguoiThue = async () => {
+    const db = getFirestore(app);
+    try {
+      const docRef = await addDoc(collection(db, "nguoithuephongs"), nguoithue);
+      thanhvien.push(docRef.id);
+      console.log("Thêm người thuê thành công: ", docRef.id);
+      updateRoomField(getRoom.roomid, "thanhvien", thanhvien)
+
+      setIsModalVisibles(false);
+    } catch (e) {
+      console.error("Error adding document: ", e);
+    }
+  }
+
+  const updateRoomField = async (roomId, fieldToUpdate, updatedValue) => {
+    const db = getFirestore(app);
+    const docRef = doc(db, "rooms", roomId); // Xác định vị trí của tài liệu
+    try {
+      await updateDoc(docRef, {
+        [fieldToUpdate]: updatedValue // Cập nhật trường fieldToUpdate với giá trị updatedValue
+      });
+      console.log("Document successfully updated!");
+    } catch (e) {
+      console.error("Error updating document: ", e);
+    }
+  }
+  
+  
+  
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -97,28 +148,31 @@ const RoomDetail = ({ route }) => {
           <Text style={styles.overlayNumber}>{getRoom.datcoc}</Text>
         </View>
       </View>
-      <TouchableOpacity style={{width: "50%",
-                backgroundColor: "#33CCFF",
-                padding: 12,
-                borderRadius: 40,
-                marginTop:130,
-                borderWidth: 2,
-                marginLeft: 120
-                }} onPress={() => toggleModals(true)}>
-        <Text style={{textAlign:'center', fontWeight:'bold',
-      color:'white'}} >Thêm người thuê</Text>
+      <TouchableOpacity style={{
+        width: "50%",
+        backgroundColor: "#33CCFF",
+        padding: 12,
+        borderRadius: 40,
+        marginTop: 130,
+        borderWidth: 2,
+        marginLeft: 120
+      }} onPress={toggleModals}>
+        <Text style={{
+          textAlign: 'center', fontWeight: 'bold',
+          color: 'white'
+        }} >Thêm người thuê</Text>
       </TouchableOpacity>
+
       <Modal
         animationType="fade"
         transparent={true}
         visible={isModalVisibles}
-        onRequestClose={toggleModals}
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContents}>
             <TouchableOpacity onPress={pickImage} style={{ marginBottom: 30 }}>
               <Image
-                source={defaultImage}
+                source={nguoithue && nguoithue.image != "" ? { uri: nguoithue.image } : defaultImage}
                 style={styles.avatar}
               />
             </TouchableOpacity>
@@ -131,10 +185,10 @@ const RoomDetail = ({ route }) => {
                 marginBottom: 12,
                 borderWidth: 2,
                 textAlign: "center",
-              }}
-              
-              
+              }} onChangeText={handleNameOnChange}
+
             >
+
             </TextInput>
 
             <TextInput
@@ -147,8 +201,8 @@ const RoomDetail = ({ route }) => {
                 borderWidth: 2,
                 textAlign: "center",
               }}
-              
-              
+              onChangeText={handlePhoneOnChange}
+
             >
             </TextInput>
             <TextInput
@@ -161,8 +215,8 @@ const RoomDetail = ({ route }) => {
                 borderWidth: 2,
                 textAlign: "center",
               }}
-              
-              
+
+              onChangeText={handleGenderOnChange}
             >
             </TextInput>
             <View
@@ -173,7 +227,7 @@ const RoomDetail = ({ route }) => {
               }}
             >
               <TouchableOpacity
-                onPress={toggleModals}
+                onPress={addNguoiThue}
                 style={styles.saveButton}
               >
                 <Text style={styles.buttonText}>Save</Text>
