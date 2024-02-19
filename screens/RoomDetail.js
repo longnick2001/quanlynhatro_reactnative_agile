@@ -1,12 +1,15 @@
 import { StyleSheet, Text, View, Image, TouchableOpacity,Modal, TextInput } from "react-native";
-import React, { useState } from "react";
+import React, { useState,useEffect  } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useIsFocused } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/Ionicons";
 import * as ImagePicker from "expo-image-picker";
+import { getFirestore } from "firebase/firestore";
+import { updateDoc, doc,getDocs } from "firebase/firestore";
+import { app } from "./firebaseConfig";
 
 const RoomDetail = ({ route }) => {
-  const { getRoom } = route.params;
+  const [getRoom, setgetRoom] = useState(route.params.getRoom);
   console.log(getRoom.tenphong +" - "+getRoom.roomid);
   const [nguoithue, setnguoithue] = useState({
     name:"",
@@ -17,7 +20,6 @@ const RoomDetail = ({ route }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalVisibles, setIsModalVisibles] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
-
 
   const isModalUpdate = () =>{
     setIsUpdate(!isUpdate);
@@ -75,36 +77,57 @@ const RoomDetail = ({ route }) => {
     // }
   };
 
+  const updateRoomData = async () => {
+    console.log("Vào hàm update");
+    const firestore = getFirestore(app);
+    try {
+        await updateDoc(doc(firestore, "rooms", getRoom.roomid), {
+            tenphong: getRoom.tenphong,
+            giaphong: getRoom.giaphong,
+            dientich: getRoom.dientich,
+            mota: getRoom.mota,
+            soluongtoida: getRoom.soluongtoida,
+            anhphong: getRoom.anhphong,
+        });
+        console.log("Rooms data updated successfully!");
+    } catch (error) {
+        console.error("Error updating Rooms data: ", error);
+    }
+};
+
   const handletenPhong = (value) => {
-    setgetRoom({ ...rooms, tenphong: value });
+    setgetRoom({ ...getRoom, tenphong: value });
   };
   const handledienTich = (value) => {
-    setgetRoom({ ...rooms, dientich: value });
+    setgetRoom({ ...getRoom, dientich: value });
   };
   const handlegiaPhong = (value) => {
-    setgetRoom({ ...rooms, giaphong: value });
+    setgetRoom({ ...getRoom, giaphong: value });
   };
   const handlemoTa = (value) => {
-    setgetRoom({ ...rooms, mota: value });
+    setgetRoom({ ...getRoom, mota: value });
   };
   const handlesoluongMax = (value) => {
-    setgetRoom({ ...rooms, soluongtoida: value });
+    setgetRoom({ ...getRoom, soluongtoida: value });
   };
   const handleanhPhong = (value) => {
-    setgetRoom({ ...rooms, anhphong: image });
+    setgetRoom({ ...getRoom, anhphong: getRoom.anhphong });
   };
-
   const delAnh = () =>{
     setgetRoom({...getRoom, anhphong: getRoom.anhphong});
   } 
-
+  const UpdateRoom = () =>{
+    updateRoomData(getRoom);
+    console.log(getRoom);
+    isModalUpdate();
+  }
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
           <Icon name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
-        <Text style={styles.title}>{getRoom.tenphong}</Text>
+        <TextInput style={styles.title} value={getRoom.tenphong}/>
         <TouchableOpacity style={{marginLeft:'auto'}} onPress={isModalUpdate}>
           <Icon name="sync" size={24} color="black" />
         </TouchableOpacity>
@@ -273,7 +296,7 @@ const RoomDetail = ({ route }) => {
             onChangeText={handlesoluongMax}
           />
           <View style={styles.modalButtons}>
-            <TouchableOpacity style={styles.modalButton}>
+            <TouchableOpacity style={styles.modalButton} onPress={UpdateRoom}>
               <Text style={styles.modalButtonText}>Lưu</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.modalButton} onPress={isModalUpdate}>

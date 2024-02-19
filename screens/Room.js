@@ -11,46 +11,49 @@ import {
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { getFirestore } from "firebase/firestore";
-import { collection, addDoc, getDocs } from "firebase/firestore";
+import { collection, addDoc, getDocs, doc } from "firebase/firestore";
 import { app } from "./firebaseConfig";
 import * as ImagePicker from "expo-image-picker";
 import { useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/FontAwesome";
 
+
 export default function Room({ route }) {
   const [rooms, setRooms] = useState([]);
-  const [roomsName, setRoomsName] = useState("");
+  const [roomID, setroomID] = useState("");
   const userId = route.params.userId[0];
   const [searchText, setSearchText] = useState("");
   const navigation = useNavigation();
   React.useEffect(() => {
-    const fetchRooms = async () => {
-      const db = getFirestore(app);
-      const roomCollection = collection(db, "rooms");
-      const querySnapshot = await getDocs(roomCollection);
-      const roomList = [];
-      querySnapshot.forEach((doc) => {
-        if (doc.data().userid === userId) {
-          const room = {
-            anhphong: doc.data().anhphong,
-            tenphong: doc.data().tenphong,
-            giaphong: doc.data().giaphong,
-            dientich: doc.data().dientich,
-            mota: doc.data().mota,
-            soluongtoida: doc.data().soluongtoida,
-            userid: doc.data().userid,
-            thanhvien: doc.data().thanhvien,
-            roomid:doc.id
+    const unsubscribe = navigation.addListener('focus', () => {
+      const fetchRooms = async () => {
+        const db = getFirestore(app);
+        const roomCollection = collection(db, "rooms");
+        const querySnapshot = await getDocs(roomCollection);
+        const roomList = [];
+        querySnapshot.forEach((doc) => {
+          if (doc.data().userid === userId) {
+            const room = {
+              anhphong: doc.data().anhphong,
+              tenphong: doc.data().tenphong,
+              giaphong: doc.data().giaphong,
+              dientich: doc.data().dientich,
+              mota: doc.data().mota,
+              soluongtoida: doc.data().soluongtoida,
+              userid: doc.data().userid,
+              thanhvien: doc.data().thanhvien,
+              roomid:doc.id,
+            }
+            roomList.push(room);
+            // console.log(room)
           }
-          roomList.push(room);
-          // console.log(room)
-        }
-      });
-      setRooms(roomList);
-    };
-
-    fetchRooms();
-  }, []);
+        });
+        setRooms(roomList);
+      };
+      fetchRooms();
+    });
+    return unsubscribe;
+  }, [navigation]);
 
 
   // Thêm hàm xử lý tìm kiếm
@@ -193,7 +196,7 @@ export default function Room({ route }) {
                   roomid: room.roomid
                   //roomId: doc.id,
                 });
-                //console.log(room.tenphong);
+                //console.log(roomid);
               }}
             >
               <View style={styles.roomImageContainer}>
