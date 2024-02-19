@@ -31,7 +31,19 @@ export default function Room({ route }) {
       const roomList = [];
       querySnapshot.forEach((doc) => {
         if (doc.data().userid === userId) {
-          roomList.push(doc.data());
+          const room = {
+            anhphong: doc.data().anhphong,
+            tenphong: doc.data().tenphong,
+            giaphong: doc.data().giaphong,
+            dientich: doc.data().dientich,
+            mota: doc.data().mota,
+            soluongtoida: doc.data().soluongtoida,
+            userid: doc.data().userid,
+            thanhvien: doc.data().thanhvien,
+            roomid:doc.id
+          }
+          roomList.push(room);
+          // console.log(room)
         }
       });
       setRooms(roomList);
@@ -51,7 +63,7 @@ export default function Room({ route }) {
         // console.log("------------------------------");
         // console.log(doc.data().tenphong);
         if (roomsName === doc.data().tenphong && userId === doc.data().userid) {
-         console.log("ID phòng: " + doc.id);
+        //  console.log("ID phòng: " + doc.id);
          }
       });
       
@@ -202,6 +214,7 @@ export default function Room({ route }) {
                 navigation.navigate("RoomDetail", {
                   getRoom: selectedRoom,
                   userId,
+                  roomid: room.roomid
                   //roomId: doc.id,
                 });
                 //console.log(room.tenphong);
