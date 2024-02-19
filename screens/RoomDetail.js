@@ -6,15 +6,12 @@ import Icon from "react-native-vector-icons/Ionicons";
 import * as ImagePicker from "expo-image-picker";
 
 const RoomDetail = ({ route }) => {
-  const [getRoom, setgetRoom]= useState(route.params.getRoom);
-  const { roomId } = route.params;
-  const [image, setImage] = useState("");
-  //console.log(roomId);
-  // const [nguoithue, setnguoithue] = useState({
-  //   name:"",
-  //   phone:"",
-
-  // });
+  const { getRoom } = route.params;
+  console.log(getRoom.tenphong +" - "+getRoom.roomid);
+  const [nguoithue, setnguoithue] = useState({
+    name:"",
+    phone:"",
+  });
   const defaultImage = require("../assets/Group.png");
   const navigation = useNavigation();
   const [isModalVisible, setIsModalVisible] = useState(false);
