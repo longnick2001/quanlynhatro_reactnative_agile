@@ -1,11 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect  } from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import FontAwesomeIcon from "react-native-vector-icons/FontAwesome";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import { ref, onValue, off } from "firebase/database"; // Correct import
 import { useNavigation } from "@react-navigation/native";
-export default function HomePage({ route }) {
+export default function HomePage({ route,navigation  }) {
   const [user, setUser] = useState(route.params.user);
-  const navigation = useNavigation();
+  const [userId, setUserId] = useState(route.params.userId);
+  const { updatedName } = route.params;
+  const IDUSER = userId[0];
+  console.log(IDUSER);
+  
   return (
     <View style={styles.container}>
       <Image
@@ -22,7 +27,7 @@ export default function HomePage({ route }) {
         >
           <View>
             <Text style={{ color: "white", fontSize: 18 }}>Xin chào</Text>
-            <Text style={styles.headerText}>{user.name}</Text>
+            <Text style={styles.headerText}>{updatedName ? updatedName : user.name}</Text>
           </View>
           <View style={{ flexDirection: "row" }}>
             <Ionicons

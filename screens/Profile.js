@@ -8,46 +8,61 @@ import {
   TextInput,
   Image,
   Button,
+  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, DrawerActions } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/Ionicons"; // Import thư viện icon, có thể thay đổi tùy thuộc vào thư viện bạn sử dụng
 import DateTimePicker from "@react-native-community/datetimepicker";
 import * as ImagePicker from "expo-image-picker";
-import { getFirestore, doc, updateDoc } from "firebase/firestore";
+import { getFirestore } from "firebase/firestore";
+import { updateDoc, doc } from "firebase/firestore";
 import { app } from "./firebaseConfig";
 
 const Profile = ({ route }) => {
   const [user, setUser] = useState(route.params.user);
   const [userId, setUserId] = useState(route.params.userId);
-
   const [image, setImage] = useState("");
   const [isEditing, setEditing] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const defaultImage = require("../assets/Group.png");
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isModalVisibles, setIsModalVisibles] = useState(false);
 
-  const handleEditPress = () => {
-    setEditing(!isEditing);
+  const toggleModal = () => {
+    setIsModalVisible(!isModalVisible);
   };
+
+  const toggleModals = () => {
+    setIsModalVisibles(!isModalVisibles);
+    setIsModalVisible(false);
+  };
+
 
   const navigation = useNavigation();
   const handleBackPress = () => {
-    navigation.goBack();
+    //navigation.goBack();
+    navigation.navigate('Home', { updatedName: user.name });
   };
-  const handleDateChange = (event, selectedDate) => {
-    setShowDatePicker(false);
-    if (selectedDate) {
-      setUser({ ...user, dob: JSON.stringify(selectedDate) });
+
+  const updateUserData = async () => {
+    const firestore = getFirestore(app);
+    const IDUSER = userId[0];
+    try {
+        await updateDoc(doc(firestore, "users", IDUSER), {
+            name: user.name,
+            phone: user.phone,
+            address: user.address,
+            image: user.image,
+        });
+        console.log("User data updated successfully!");
+    } catch (error) {
+        console.error("Error updating user data: ", error);
     }
-  };
-  const formatDate = (date) => {
-    const day = date.getDate();
-    const month = date.getMonth() + 1;
-    const year = date.getFullYear();
-    return `${day < 10 ? "0" : ""}${day}-${
-      month < 10 ? "0" : ""
-    }${month}-${year}`;
-  };
+    
+};
+
+
 
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
@@ -58,7 +73,7 @@ const Profile = ({ route }) => {
       quality: 1,
     });
     if (!result.canceled) {
-      setUser({ ...user, image: result.uri });
+      setUser({ ...user, image: result.assets[0].uri});
       // console.log('base64: '+result.uri.base64);
       setImage(result.assets[0].uri);
     }
@@ -68,31 +83,27 @@ const Profile = ({ route }) => {
     // }
   };
 
-  const updateUserDatas = async () => {
-    const userRef = doc(getFirestore(app), "users", userId);
-
-    try {
-      await updateDoc(userRef, user);
-      console.log("User data updated successfully!");
-      setUser(user);
-      setEditing(false);
-    } catch (error) {
-      console.error("Error updating user data:", error);
-    }
-  };
+  
 
   const handleNameOnChange = (value) => {
     setUser({ ...user, name: value });
   };
-  const handleOnChangeGender = (value) => {
-    setUser({ ...user, gender: value });
+  const handleOnChangeAddress = (value) => {
+    setUser({ ...user, address: value });
   };
   const handleOnChangePass = (value) => {
     setUser({ ...user, pass: value });
   };
-  const handleOnChangeMail = (value) => {
-    setUser({ ...user, email: value });
+  const handleOnChangePhone = (value) => {
+    setUser({ ...user, phone: value });
   };
+
+  const handleSaveAndClose = () => {
+    updateUserData(user);
+    toggleModals();
+  };
+
+  
 
   return (
     <SafeAreaView style={styles.container}>
@@ -101,14 +112,11 @@ const Profile = ({ route }) => {
           <Icon name="arrow-back" size={24} color="blue" />
         </TouchableOpacity>
         <Text style={styles.title}>Hồ sơ</Text>
-        <TouchableOpacity style={{ marginLeft: 250 }} onPress={handleEditPress}>
-          <Text className="text-sky-600">Sửa thông tin</Text>
-        </TouchableOpacity>
       </View>
       {/* Upper overlay */}
       <View style={[styles.overlay, styles.upperOverlay]}>
         <View>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={toggleModal}>
             <Image
               source={user.image ? { uri: user.image } : defaultImage}
               style={styles.avatar}
@@ -117,8 +125,7 @@ const Profile = ({ route }) => {
           <TextInput
             style={styles.input}
             value={user.name}
-            onChangeText={handleNameOnChange}
-            editable={isEditing}
+            editable={false}
           />
           <View
             style={{
@@ -133,8 +140,8 @@ const Profile = ({ route }) => {
             <TextInput
               style={{ color: "black" }}
               value={user.phone}
-              onChangeText={handleOnChangeMail}
-              editable={isEditing}
+              editable={false}
+              
             />
           </View>
           <View
@@ -150,26 +157,146 @@ const Profile = ({ route }) => {
             <TextInput
               style={{ color: "black" }}
               value={user.address}
-              onChangeText={handleOnChangeMail}
-              editable={isEditing}
+              editable={false}
             />
           </View>
         </View>
       </View>
       <View style={[styles.overlay, styles.lowerOverlay]}>
-        <View style={{flexDirection: 'row', marginBottom: 10}}>
-            <Text style={{fontWeight: 'bold'}}>Gói quản lý</Text>
-            <Text style={{marginLeft: 30, fontWeight: 'bold', color:'green'}}>Cá nhân</Text>
+        <View style={{ flexDirection: "row", marginBottom: 10 }}>
+          <Text style={{ fontWeight: "bold" }}>Gói quản lý</Text>
+          <Text style={{ marginLeft: 30, fontWeight: "bold", color: "green" }}>
+            Cá nhân
+          </Text>
         </View>
-        <View style={{flexDirection: 'row', marginBottom: 10}}>
-            <Text style={{fontWeight: 'normal'}}>Ngày kích hoạt</Text>
-            <Text style={{marginLeft: 220, fontWeight: 'bold'}}>18-02-2024</Text>
+        <View style={{ flexDirection: "row", marginBottom: 10 }}>
+          <Text style={{ fontWeight: "normal" }}>Ngày kích hoạt</Text>
+          <Text style={{ marginLeft: 220, fontWeight: "bold" }}>
+            18-02-2024
+          </Text>
         </View>
-        <View style={{flexDirection: 'row'}}>
-            <Text style={{fontWeight: 'normal'}}>Ngày kết thúc</Text>
-            <Text style={{marginLeft: 227, fontWeight: 'bold'}}>18-03-2024</Text>
+        <View style={{ flexDirection: "row" }}>
+          <Text style={{ fontWeight: "normal" }}>Ngày kết thúc</Text>
+          <Text style={{ marginLeft: 227, fontWeight: "bold" }}>
+            18-03-2024
+          </Text>
         </View>
       </View>
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={isModalVisible}
+        onRequestClose={toggleModal}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity
+              className="w-full bg-sky-300 p-3 rounded-2xl mb-3"
+              onPress={toggleModals}
+            >
+              <Text className="text-x font-bold text-white text-center">
+                Cập nhật
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity className="w-full bg-sky-300 p-3 rounded-2xl mb-3">
+              <Text className="text-x font-bold text-white text-center">
+                Chuyển đổi doanh nghiệp
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity className="w-full bg-sky-300 p-3 rounded-2xl mb-3">
+              <Text className="text-x font-bold text-white text-center">
+                Xóa
+              </Text>
+            </TouchableOpacity>
+            {/* Add your update, delete account buttons or any other functionality */}
+            <Button title="Close" onPress={toggleModal} />
+          </View>
+        </View>
+      </Modal>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isModalVisibles}
+        onRequestClose={toggleModals}
+      >
+        <View style={styles.modalContainers}>
+          <View style={styles.modalContents}>
+            <TouchableOpacity onPress={pickImage} style={{ marginBottom: 30 }}>
+              <Image
+                source={user.image ? { uri: user.image } : defaultImage}
+                style={styles.avatar}
+              />
+            </TouchableOpacity>
+            <TextInput
+              style={{
+                width: "100%",
+                backgroundColor: "#ccc",
+                padding: 12,
+                borderRadius: 20,
+                marginBottom: 12,
+                borderWidth: 2,
+                textAlign: "center",
+              }}
+              value={user.name}
+              onChangeText={handleNameOnChange}
+              
+            >
+            </TextInput>
+
+            <TextInput
+              style={{
+                width: "100%",
+                backgroundColor: "#ccc",
+                padding: 12,
+                borderRadius: 20,
+                marginBottom: 12,
+                borderWidth: 2,
+                textAlign: "center",
+              }}
+              value={user.phone}
+              onChangeText={handleOnChangePhone}
+              
+            >
+            </TextInput>
+            <TextInput
+              style={{
+                width: "100%",
+                backgroundColor: "#ccc",
+                padding: 12,
+                borderRadius: 20,
+                marginBottom: 12,
+                borderWidth: 2,
+                textAlign: "center",
+              }}
+              value={user.address}
+              onChangeText={handleOnChangeAddress}
+              
+            >
+            </TextInput>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <TouchableOpacity
+                onPress={handleSaveAndClose}
+                style={styles.saveButton}
+              >
+                <Text style={styles.buttonText}>Save</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={toggleModals}
+                style={styles.closeButton}
+              >
+                <Text style={styles.buttonText}>Close</Text>
+              </TouchableOpacity>
+            </View>
+            {/* Add your update, delete account buttons or any other functionality */}
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -207,8 +334,8 @@ const styles = StyleSheet.create({
     height: 150,
     borderRadius: 75,
     marginLeft: 115,
-    borderColor: 'green',
-    borderWidth: 5
+    borderColor: "green",
+    borderWidth: 5,
   },
   name: {
     fontSize: 24,
@@ -255,6 +382,48 @@ const styles = StyleSheet.create({
     bottom: "35%",
     backgroundColor: "white", // Semi-transparent white background
     zIndex: 1,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "flex-end",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // opacity for the background
+  },
+  modalContents: {
+    backgroundColor: "#FFF",
+    padding: 20,
+    margin: 20,
+    width: "90%",
+    borderRadius: 10,
+  },
+  modalContent: {
+    backgroundColor: "#FFF",
+    padding: 20,
+    width: "100%",
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+  },
+  modalContainers: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // opacity for the background
+  },
+  saveButton: {
+    backgroundColor: "blue",
+    padding: 10,
+    borderRadius: 5,
+    marginRight: 10, // Điều chỉnh khoảng cách giữa các nút (nếu cần)
+  },
+  closeButton: {
+    backgroundColor: "red",
+    padding: 10,
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: "white",
+    textAlign: "center",
+    fontSize: 16,
   },
 });
 export default Profile;

@@ -1,28 +1,38 @@
-import { View, Text, Button, ScrollView, StyleSheet, Image, TouchableOpacity, Modal, TextInput } from "react-native";
+import {
+  View,
+  Text,
+  Button,
+  ScrollView,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  Modal,
+  TextInput,
+} from "react-native";
 import React, { useEffect, useState } from "react";
 import { getFirestore } from "firebase/firestore";
 import { collection, addDoc, getDocs } from "firebase/firestore";
 import { app } from "./firebaseConfig";
 import * as ImagePicker from "expo-image-picker";
-import { useNavigation } from '@react-navigation/native';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import { useNavigation } from "@react-navigation/native";
+import Icon from "react-native-vector-icons/FontAwesome";
 
 export default function Room({ route }) {
   const [rooms, setRooms] = useState([]);
+  const [roomsName, setRoomsName] = useState("");
   const userId = route.params.userId[0];
-  const [searchText, setSearchText] = useState('');
+  const [searchText, setSearchText] = useState("");
   const navigation = useNavigation();
   React.useEffect(() => {
     const fetchRooms = async () => {
       const db = getFirestore(app);
-      const roomCollection = collection(db, 'rooms');
+      const roomCollection = collection(db, "rooms");
       const querySnapshot = await getDocs(roomCollection);
       const roomList = [];
       querySnapshot.forEach((doc) => {
         if (doc.data().userid === userId) {
           roomList.push(doc.data());
         }
-
       });
       setRooms(roomList);
     };
@@ -30,24 +40,48 @@ export default function Room({ route }) {
     fetchRooms();
   }, []);
 
-   // Thêm hàm xử lý tìm kiếm
-   const filterRooms = (text) => {
-    const filteredRooms = rooms.filter(
-      (room) => room.tenphong.toLowerCase().includes(text.toLowerCase())
+  const getDataFromFirebase = async (room) => {
+    const db = getFirestore(app);
+    const roomsCollection = collection(db, "rooms");
+    const tenPhongs = rooms.map(room => room.tenphong);
+    try {
+      const querySnapshot = await getDocs(roomsCollection);
+      querySnapshot.forEach((doc) => {
+        // console.log(roomsName);
+        // console.log("------------------------------");
+        // console.log(doc.data().tenphong);
+        if (roomsName === doc.data().tenphong && userId === doc.data().userid) {
+         console.log("ID phòng: " + doc.id);
+         }
+      });
+      
+    } catch (error) {
+      console.error("Lỗi khi lấy dữ liệu: ", error);
+    }
+  };
+
+  const getroomId = () => {
+    
+    getDataFromFirebase(rooms);
+  };
+
+  // Thêm hàm xử lý tìm kiếm
+  const filterRooms = (text) => {
+    const filteredRooms = rooms.filter((room) =>
+      room.tenphong.toLowerCase().includes(text.toLowerCase())
     );
     return filteredRooms;
   };
 
-
   //thêm phòng
-  const defaultImage = require('../assets/images/phongtro.png');
+  const defaultImage = require("../assets/images/phongtro.png");
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [newRoom, setNewRoom] = useState({
-    anhphong: '',
-    tenphong: '',
-    giaphong: '',
-    dientich: '',
-    mota: '',
+    anhphong: "",
+    tenphong: "",
+    giaphong: "",
+    dientich: "",
+    mota: "",
     soluongtoida: 0,
     userid: userId,
     thanhvien: [],
@@ -56,15 +90,15 @@ export default function Room({ route }) {
   const toggleModal = () => {
     setIsModalVisible(!isModalVisible);
     setNewRoom({
-      anhphong: '',
-      tenphong: '',
-      giaphong: '',
-      dientich: '',
-      mota: '',
+      anhphong: "",
+      tenphong: "",
+      giaphong: "",
+      dientich: "",
+      mota: "",
       soluongtoida: 0,
       userid: userId,
       thanhvien: [],
-    })
+    });
   };
 
   //hàm xử lý đưa dữ liệu lên firebase
@@ -86,15 +120,15 @@ export default function Room({ route }) {
     // Đóng dialog
     setIsModalVisible(false);
     setNewRoom({
-      anhphong: '',
-      tenphong: '',
-      giaphong: '',
-      dientich: '',
-      mota: '',
+      anhphong: "",
+      tenphong: "",
+      giaphong: "",
+      dientich: "",
+      mota: "",
       soluongtoida: 0,
       userid: userId,
       thanhvien: [],
-    })
+    });
   };
 
   const pickImage = async () => {
@@ -107,36 +141,45 @@ export default function Room({ route }) {
     });
     if (!result.canceled) {
       setNewRoom({ ...newRoom, anhphong: result.assets[0].uri });
-      console.log('base64: ' + result.assets[0].uri);
+      console.log("base64: " + result.assets[0].uri);
       // setImage(result.assets[0].uri);
     }
   };
+
   const renderIcons = (room) => {
     return (
       <View style={styles.iconContainer}>
-        <Image style={styles.iconImage} source={require('../assets/images/phongtro.png')}/>
-        <Text style={{color: 'green', fontWeight:'bold', fontSize: 20}}>{room.tenphong}</Text>
+        <Image
+          style={styles.iconImage}
+          source={require("../assets/images/phongtro.png")}
+        />
+        <Text style={{ color: "green", fontWeight: "bold", fontSize: 20 }}>
+          {room.tenphong}
+        </Text>
         <Text style={styles.iconText}>{room.giaphong}</Text>
         <View style={styles.horizontalIcons}>
           <View style={styles.roomview}>
-          <Icon name="user" size={20} color="#555" style={styles.icon} />
-          <Text style={{ marginTop: 3, fontWeight: 'bold'}}>0</Text>
+            <Icon name="user" size={20} color="#555" style={styles.icon} />
+            <Text style={{ marginTop: 3, fontWeight: "bold" }}>0</Text>
           </View>
           <View style={styles.roomview}>
-          <Icon name="dollar" size={20} color="#555" style={styles.icon} />
-          <Text style={{ marginTop: 3, fontWeight: 'bold'}}>0</Text>
+            <Icon name="dollar" size={20} color="#555" style={styles.icon} />
+            <Text style={{ marginTop: 3, fontWeight: "bold" }}>0</Text>
           </View>
           <View style={styles.roomview}>
-          <Icon name="exclamation-circle" size={20} color="#555" style={styles.icon} />
-          <Text style={{ marginTop: 3, fontWeight: 'bold'}}>0</Text>
+            <Icon
+              name="exclamation-circle"
+              size={20}
+              color="#555"
+              style={styles.icon}
+            />
+            <Text style={{ marginTop: 3, fontWeight: "bold" }}>0</Text>
           </View>
-          
         </View>
       </View>
     );
   };
   return (
-
     <View style={styles.container}>
       <View style={styles.searchContainer}>
         <Icon name="search" size={20} color="#555" style={styles.searchIcon} />
@@ -144,18 +187,26 @@ export default function Room({ route }) {
           style={styles.input}
           placeholder="Tìm kiếm theo tên"
           value={searchText}
-          onChangeText={text => setSearchText(text)}
+          onChangeText={(text) => setSearchText(text)}
         />
       </View>
 
-      <ScrollView style={{ width: '100%' }}>
+      <ScrollView style={{ width: "100%" }}>
         <View style={styles.roomList}>
           {filterRooms(searchText).map((room, index) => (
             <TouchableOpacity
               key={index}
               style={styles.roomItem}
               onPress={() => {
-                navigation.navigate('RoomDetail', { data: room });
+                const selectedRoom = rooms[index];
+                navigation.navigate("RoomDetail", {
+                  getRoom: selectedRoom,
+                  userId,
+                  //roomId: doc.id,
+                });
+                //console.log(room.tenphong);
+                setRoomsName(room.tenphong);
+                getroomId();
               }}
             >
               <View style={styles.roomImageContainer}>
@@ -178,7 +229,12 @@ export default function Room({ route }) {
         <View style={styles.modalContainer}>
           <Text style={styles.modalTitle}>Thêm Phòng</Text>
           <TouchableOpacity onPress={pickImage}>
-            <Image source={newRoom.anhphong ? { uri: newRoom.anhphong } : defaultImage} style={{ width: 100, height: 100 }} />
+            <Image
+              source={
+                newRoom.anhphong ? { uri: newRoom.anhphong } : defaultImage
+              }
+              style={{ width: 100, height: 100 }}
+            />
           </TouchableOpacity>
           <TextInput
             style={styles.input}
@@ -209,7 +265,9 @@ export default function Room({ route }) {
             placeholder="Số lượng tối đa"
             value={newRoom.soluongtoida}
             keyboardType="numeric"
-            onChangeText={(text) => setNewRoom({ ...newRoom, soluongtoida: text })}
+            onChangeText={(text) =>
+              setNewRoom({ ...newRoom, soluongtoida: text })
+            }
           />
           <View style={styles.modalButtons}>
             <TouchableOpacity style={styles.modalButton} onPress={addRoom}>
@@ -222,34 +280,33 @@ export default function Room({ route }) {
         </View>
       </Modal>
     </View>
-
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center'
+    justifyContent: "center",
+    alignItems: "center",
   },
   roomList: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
     padding: 10,
   },
   roomItem: {
-    width: '48%',
+    width: "48%",
     marginBottom: 10,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 5,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
   },
   iconContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 10,
   },
   icon: {
@@ -257,19 +314,19 @@ const styles = StyleSheet.create({
   },
   iconText: {
     fontSize: 16,
-    color: '#555',
+    color: "#555",
   },
   roomImageContainer: {
-  backgroundColor: 'white',
-  borderRadius: 5,
-  shadowColor: '#000',
-  shadowOffset: {
-    width: 0,
-    height: 2,
-  },
-  shadowOpacity: 0.25,
-  shadowRadius: 3.84,
-  elevation: 5,
+    backgroundColor: "white",
+    borderRadius: 5,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   roomImage: {
     width: 160,
@@ -278,17 +335,17 @@ const styles = StyleSheet.create({
   },
   roomDetails: {
     flex: 1,
-    backgroundColor: '#10DEDE',
+    backgroundColor: "#10DEDE",
     borderRadius: 10,
-    padding: 8
+    padding: 8,
   },
   roomName: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   roomInfo: {
     fontSize: 16,
-    color: 'black',
+    color: "black",
     marginTop: 5,
   },
   roomDescription: {
@@ -296,80 +353,80 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   fabButton: {
-    position: 'absolute',
+    position: "absolute",
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#10DEDE',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#10DEDE",
+    justifyContent: "center",
+    alignItems: "center",
     bottom: 20,
     right: 20,
     elevation: 8,
   },
   fabText: {
     fontSize: 24,
-    color: 'white',
-    fontWeight: 'bold',
+    color: "white",
+    fontWeight: "bold",
   },
   modalContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   modalTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 20,
   },
   input: {
-    width: '80%',
+    width: "80%",
     height: 40,
     marginVertical: 10,
     padding: 10,
     paddingLeft: 30,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 5,
   },
   modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
   },
   modalButton: {
-    backgroundColor: '#10DEDE', // Màu nền của nút
+    backgroundColor: "#10DEDE", // Màu nền của nút
     padding: 10, // Khoảng cách giữa nút và kích thước nút
     borderRadius: 8, // Bo góc của nút
-    margin:10
+    margin: 10,
   },
   modalButtonText: {
-    color: 'white', // Màu chữ của nút
-    textAlign: 'center', // Căn giữa nội dung của nút
-    fontWeight:'bold'
+    color: "white", // Màu chữ của nút
+    textAlign: "center", // Căn giữa nội dung của nút
+    fontWeight: "bold",
   },
   searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderColor: '#aaa',
+    flexDirection: "row",
+    alignItems: "center",
+    borderColor: "#aaa",
   },
   searchIcon: {
-    position: 'absolute',
+    position: "absolute",
     left: 5,
     zIndex: 1,
   },
   horizontalIcons: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginTop: 5,
-    alignItems: 'center',
+    alignItems: "center",
   },
-  roomview:
-  {flexDirection: 'row', 
-  paddingLeft: 25, 
-  paddingRight: 16,
-  marginBottom: 10
-},
-iconImage: {
-  width: 100, // Độ rộng của ảnh
-  height: 100, // Độ cao của ảnh
-},
+  roomview: {
+    flexDirection: "row",
+    paddingLeft: 25,
+    paddingRight: 16,
+    marginBottom: 10,
+  },
+  iconImage: {
+    width: 100, // Độ rộng của ảnh
+    height: 100, // Độ cao của ảnh
+  },
 });
