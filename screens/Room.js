@@ -52,30 +52,6 @@ export default function Room({ route }) {
     fetchRooms();
   }, []);
 
-  const getDataFromFirebase = async (room) => {
-    const db = getFirestore(app);
-    const roomsCollection = collection(db, "rooms");
-    const tenPhongs = rooms.map(room => room.tenphong);
-    try {
-      const querySnapshot = await getDocs(roomsCollection);
-      querySnapshot.forEach((doc) => {
-        // console.log(roomsName);
-        // console.log("------------------------------");
-        // console.log(doc.data().tenphong);
-        if (roomsName === doc.data().tenphong && userId === doc.data().userid) {
-        //  console.log("ID phòng: " + doc.id);
-         }
-      });
-      
-    } catch (error) {
-      console.error("Lỗi khi lấy dữ liệu: ", error);
-    }
-  };
-
-  const getroomId = () => {
-    
-    getDataFromFirebase(rooms);
-  };
 
   // Thêm hàm xử lý tìm kiếm
   const filterRooms = (text) => {
@@ -218,8 +194,6 @@ export default function Room({ route }) {
                   //roomId: doc.id,
                 });
                 //console.log(room.tenphong);
-                setRoomsName(room.tenphong);
-                getroomId();
               }}
             >
               <View style={styles.roomImageContainer}>
