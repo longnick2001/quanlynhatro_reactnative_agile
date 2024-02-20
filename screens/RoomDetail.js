@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Modal,
   TextInput,
+  ScrollView,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -13,7 +14,7 @@ import { useNavigation, useIsFocused } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/Ionicons";
 import * as ImagePicker from "expo-image-picker";
 import { getFirestore } from "firebase/firestore";
-import { collection, addDoc, getDocs, getDoc, doc, updateDoc} from "firebase/firestore";
+import { collection, addDoc, getDocs, getDoc, doc, updateDoc } from "firebase/firestore";
 import { app } from "./firebaseConfig";
 
 const RoomDetail = ({ route }) => {
@@ -162,7 +163,7 @@ const RoomDetail = ({ route }) => {
     const db = getFirestore(app);
     try {
       const docRef = await addDoc(collection(db, "nguoithuephongs"), nguoithue);
-      thanhvien.push(docRef.id);
+      setThanhVien(thanhvien.push(docRef.id));
       console.log("Thêm người thuê thành công: ", docRef.id);
       updateRoomField(getRoom.roomid, "thanhvien", thanhvien);
 
@@ -184,6 +185,50 @@ const RoomDetail = ({ route }) => {
       console.error("Error updating document: ", e);
     }
   };
+  const db = getFirestore(app);
+  const [nguoithues, setNguoithues] = useState([]);
+  const [xemDanhSach, setXemDanhSach] = useState(false);
+  React.useEffect(() => {
+    const fetchRooms = async () => {
+      const roomCollection = collection(db, "nguoithuephongs");
+      const querySnapshot = await getDocs(roomCollection);
+      const roomList = [];
+      querySnapshot.forEach(async (docs) => {
+        thanhvien.forEach(async (id) => {
+          if (docs.data().userid === userId && id === docs.id) {
+            console.log("fetch" + docs.data());
+            //////
+            const docRef = doc(db, "rooms", docs.data().roomid);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+              console.log("Document data:", docSnap.data());
+              roomList.push({
+                image: docs.data().image,
+                name: docs.data().name,
+                phone: docs.data().phone,
+                gender: docs.data().gender,
+                userid: docs.data().userid,
+                roomid: docs.data().roomid,
+                tenphong: docSnap.data().tenphong,
+              });
+
+            } else {
+              // docSnap.data() will be undefined in this case
+              console.log("No such document!");
+            }
+            //////
+          }
+        })
+      });
+      setNguoithues(roomList);
+    };
+    fetchRooms();
+  }, []);
+
+  const toggleXemDanhSach = ()=>{
+    setXemDanhSach(!xemDanhSach);
+  }
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -229,6 +274,23 @@ const RoomDetail = ({ route }) => {
           <Text style={styles.overlayNumber}>{getRoom.datcoc}</Text>
         </View>
       </View>
+      
+      <TouchableOpacity style={{
+          width: "30%",
+          backgroundColor: "#33CCFF",
+          padding: 12,
+          borderRadius: 40,
+          
+          borderWidth: 2,
+          
+          position:'absolute',
+          right: 10,
+          top: 100
+        }} onPress={toggleXemDanhSach}>
+        <Text style={{ textAlign: "center", fontWeight: "bold", color: "white" }}>
+          Danh sách
+        </Text>
+      </TouchableOpacity>
       <TouchableOpacity
         style={{
           width: "50%",
@@ -383,6 +445,40 @@ const RoomDetail = ({ route }) => {
           </View>
         </View>
       </Modal>
+      <Modal visible={xemDanhSach} animationType="slide">
+      <ScrollView style={{ width: "100%"}}>
+      <TouchableOpacity style={{
+          width: "30%",
+          backgroundColor: "#33CCFF",
+          padding: 4,
+          borderRadius: 40,
+          borderWidth: 2,
+          margin:10
+        }} onPress={toggleXemDanhSach}>
+        <Text style={{ textAlign: "center", fontWeight: "bold", color: "white" }}>
+          Đóng
+        </Text>
+      </TouchableOpacity>
+        {nguoithues.map((item, index) => (
+          <View key={index} style={styles.roomItem}>
+            <View style={styles.roomImageContainer}>
+              <Image
+                source={item.image != "" ? { uri: item.image } : require("../assets/images/user.png")}
+                style={styles.roomImage}
+              />
+            </View>
+            <View style={styles.roomDetails}>
+              <Text style={[styles.roomInfo, { fontSize: 20 }]}>
+                {item.name}
+              </Text>
+              <Text style={styles.roomDescription}>Phòng: {item.tenphong}</Text>
+              <Text style={styles.roomInfo}>Giới tính: {item.gender}</Text>
+              <Text style={styles.roomInfo}>Số điện thoại: {item.phone}</Text>
+            </View>
+          </View>
+        ))}
+      </ScrollView>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -529,4 +625,36 @@ const styles = StyleSheet.create({
     textAlign: "center", // Căn giữa nội dung của nút
     fontWeight: "bold",
   },
+  roomItem: {
+    padding: 10,
+    margin: 5,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    flexDirection: "row",
+  },
+  roomImageContainer: {
+    marginRight: 10,
+  },
+  roomImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 5,
+    marginTop: 15
+  },
+  roomDetails: {
+    flex: 1,
+    backgroundColor: "#10DEDE",
+    borderRadius: 10,
+    padding: 8,
+  },
+  roomInfo: {
+    fontSize: 16,
+    color: "black",
+    marginTop: 5,
+  },
+  roomDescription: {
+    fontSize: 16,
+    marginTop: 10,
+  }
 });

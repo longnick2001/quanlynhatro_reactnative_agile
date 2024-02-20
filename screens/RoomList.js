@@ -17,7 +17,6 @@ import Icon from "react-native-vector-icons/FontAwesome";
 export default function RoomList({ route }) {
   const userId = route.params.userId[0];
   const [nguoithue, setNguoithues] = useState([]);
-  const [room, setRoom] = useState({});
   const db = getFirestore(app);
   const [searchText, setSearchText] = useState("");
 
@@ -25,18 +24,34 @@ export default function RoomList({ route }) {
     const fetchRooms = async () => {
       const roomCollection = collection(db, "nguoithuephongs");
       const querySnapshot = await getDocs(roomCollection);
-      const roomList = [];
+      const roomList = [{
+        image: "",
+        gender: "",
+        phone: "",
+        name: "",
+        roomid: "",
+        userid: userId,
+        tenphong: ""
+      }];
       querySnapshot.forEach(async (docs) => {
         if (docs.data().userid === userId) {
-          roomList.push(docs.data());
-          console.log("fetch" + docs.data().roomid);
+          console.log("fetch" + docs.data());
           //////
           const docRef = doc(db, "rooms", docs.data().roomid);
           const docSnap = await getDoc(docRef);
 
           if (docSnap.exists()) {
             console.log("Document data:", docSnap.data());
-            setRoom(docSnap.data());
+            roomList.push({
+              image: docs.data().image,
+              name: docs.data().name,
+              phone: docs.data().phone,
+              gender: docs.data().gender,
+              userid: docs.data().userid,
+              roomid: docs.data().roomid,
+              tenphong: docSnap.data().tenphong,
+            });
+
           } else {
             // docSnap.data() will be undefined in this case
             console.log("No such document!");
@@ -55,8 +70,8 @@ export default function RoomList({ route }) {
       (item) =>
         item.name.toLowerCase().includes(text.toLowerCase()) ||
         item.gender.toLowerCase().includes(text.toLowerCase()) ||
-        item.dob.toLowerCase().includes(text.toLowerCase()) ||
-        room.tenphong.toLowerCase().includes(text.toLowerCase())
+        item.phone.toLowerCase().includes(text.toLowerCase()) ||
+        item.tenphong.toLowerCase().includes(text.toLowerCase())
     );
     return filteredRooms;
   };
@@ -64,13 +79,13 @@ export default function RoomList({ route }) {
   //thêm phòng
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [newNguoiThue, setnewNguoiThue] = useState({
-    anh: "",
-    dob: "",
-    email: "",
+    image: "",
     gender: "",
+    phone: "",
     name: "",
     roomid: "",
     userid: userId,
+    tenphong: ""
   });
 
   const toggleModal = () => {
@@ -93,7 +108,7 @@ export default function RoomList({ route }) {
           <View key={index} style={styles.roomItem}>
             <View style={styles.roomImageContainer}>
               <Image
-                source={require("../assets/images/user.png")}
+                source={item.image != "" ? { uri: item.image } : require("../assets/images/user.png")}
                 style={styles.roomImage}
               />
             </View>
@@ -101,9 +116,9 @@ export default function RoomList({ route }) {
               <Text style={[styles.roomInfo, { fontSize: 20 }]}>
                 {item.name}
               </Text>
-              <Text style={styles.roomDescription}>Phòng: {room.tenphong}</Text>
+              <Text style={styles.roomDescription}>Phòng: {item.tenphong}</Text>
               <Text style={styles.roomInfo}>Giới tính: {item.gender}</Text>
-              <Text style={styles.roomInfo}>Ngày sinh: {item.dob}</Text>
+              <Text style={styles.roomInfo}>Số điện thoại: {item.phone}</Text>
             </View>
           </View>
         ))}
