@@ -30,7 +30,7 @@ const RoomDetail = ({ route }) => {
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [selectedMonthYear, setSelectedMonthYear] = useState("");
   const { userId } = route.params;
-  console.log("Tháng: " + selectedMonthYear);
+  console.log("ID: " + getRoom.roomid);
   const [nguoithue, setnguoithue] = useState({
     name: "",
     phone: "",
@@ -232,7 +232,7 @@ const RoomDetail = ({ route }) => {
     try {
       const docRef = await addDoc(collection(db, "bills"), hoaDon);
       console.log("Thêm thành công hóa đơn", docRef.id);
-      alert("Thêm thành công");
+      alert("Tạo thành công hóa đơn " + getRoom.tenphong);
       //window.location.reload();
     } catch (e) {
       console.error("Error adding document: ", e);
@@ -308,9 +308,7 @@ const RoomDetail = ({ route }) => {
   };
 
   var soTienDien = tinhTienDien(soDienSuDung, giaMoiSo);
-
   var soTienNuoc = tinhTienNuoc(soNuocSuDung, giaSoNuoc);
-
   var newTongTiens = formatPrice(
     soTienDien + soTienNuoc + giaVeSinh + parseFloat(getRoom.giaphong)
   );
@@ -357,11 +355,13 @@ const RoomDetail = ({ route }) => {
       <View>
         <Image
           style={{
-            width: "100%",
+            width: "95%",
             height: "60%",
-            borderColor: "black",
+            borderColor: "green",
             borderWidth: 2,
             borderRadius: 5,
+            marginLeft:10,
+            marginRight: 10
           }}
           source={{ uri: getRoom.anhphong }}
         />
@@ -388,7 +388,7 @@ const RoomDetail = ({ route }) => {
           <Text style={styles.overlayText}>Mô tả</Text>
           <Text style={styles.overlayNumbers}>{getRoom.mota}</Text>
           <Text style={styles.overlayText}>Đặt cọc</Text>
-          <Text style={styles.overlayNumber}>{getRoom.datcoc}</Text>
+          <Text style={styles.overlayNumber}>{formatPrice(getRoom.datcoc)} đ</Text>
         </View>
       </View>
       <View
@@ -484,38 +484,41 @@ const RoomDetail = ({ route }) => {
             <TextInput
               style={{
                 width: "100%",
-                backgroundColor: "#ccc",
+                backgroundColor: "white",
                 padding: 12,
-                borderRadius: 20,
+                borderRadius: 10,
                 marginBottom: 12,
                 borderWidth: 2,
                 textAlign: "center",
               }}
+              placeholder="Họ & Tên"
               onChangeText={handleNameOnChange}
             ></TextInput>
 
             <TextInput
               style={{
                 width: "100%",
-                backgroundColor: "#ccc",
+                backgroundColor: "white",
                 padding: 12,
-                borderRadius: 20,
+                borderRadius: 10,
                 marginBottom: 12,
                 borderWidth: 2,
                 textAlign: "center",
               }}
+              placeholder="Số điện thoại"
               onChangeText={handlePhoneOnChange}
             ></TextInput>
             <TextInput
               style={{
                 width: "100%",
-                backgroundColor: "#ccc",
+                backgroundColor: "white",
                 padding: 12,
-                borderRadius: 20,
+                borderRadius: 10,
                 marginBottom: 12,
                 borderWidth: 2,
                 textAlign: "center",
               }}
+              placeholder="Giới tính"
               onChangeText={handleGenderOnChange}
             ></TextInput>
             <View
@@ -736,7 +739,9 @@ const RoomDetail = ({ route }) => {
           <View style={styles.modalButtons}>
             <TouchableOpacity
               style={styles.modalButton}
-              onPress={hoaDonsenDataToFirebase}
+              onPress={() =>{
+                hoaDonsenDataToFirebase();
+                isModalHoaDon();}}
             >
               <Text style={styles.modalButtonText}>Tạo</Text>
             </TouchableOpacity>
@@ -850,6 +855,8 @@ const styles = StyleSheet.create({
     margin: 20,
     width: "90%",
     borderRadius: 10,
+    borderColor:'#33CCFF',
+    borderWidth: 2
   },
   saveButton: {
     backgroundColor: "blue",
@@ -872,8 +879,8 @@ const styles = StyleSheet.create({
     height: 150,
     borderRadius: 75,
     marginLeft: 115,
-    borderColor: "green",
-    borderWidth: 5,
+    borderColor: "black",
+    borderWidth: 2,
   },
   input: {
     width: "80%",

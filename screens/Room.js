@@ -24,6 +24,7 @@ export default function Room({ route }) {
   const userId = route.params.userId[0];
   const [searchText, setSearchText] = useState("");
   const navigation = useNavigation();
+ 
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       const fetchRooms = async () => {
@@ -39,13 +40,13 @@ export default function Room({ route }) {
               giaphong: doc.data().giaphong,
               dientich: doc.data().dientich,
               mota: doc.data().mota,
+              datcoc: doc.data().datcoc,
               soluongtoida: doc.data().soluongtoida,
               userid: doc.data().userid,
               thanhvien: doc.data().thanhvien,
               roomid:doc.id,
             }
             roomList.push(room);
-            // console.log(room)
           }
         });
         setRooms(roomList);
@@ -54,7 +55,13 @@ export default function Room({ route }) {
     });
     return unsubscribe;
   }, [navigation]);
-
+  function formatPrice(price) {
+    price = String(price);
+    if (price.length >= 4) {
+      price = price.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+    return price;
+  }
 
   // Thêm hàm xử lý tìm kiếm
   const filterRooms = (text) => {
@@ -73,6 +80,7 @@ export default function Room({ route }) {
     giaphong: "",
     dientich: "",
     mota: "",
+    datcoc:500000,
     soluongtoida: 0,
     userid: userId,
     thanhvien: [],
@@ -86,6 +94,7 @@ export default function Room({ route }) {
       giaphong: "",
       dientich: "",
       mota: "",
+      datcoc:500000,
       soluongtoida: 0,
       userid: userId,
       thanhvien: [],
@@ -102,7 +111,6 @@ export default function Room({ route }) {
       console.error("Error adding document: ", e);
     }
   };
-
   const addRoom = () => {
     // Thêm phòng vào danh sách phòng
     setRooms([...rooms, newRoom]);
@@ -116,12 +124,12 @@ export default function Room({ route }) {
       giaphong: "",
       dientich: "",
       mota: "",
+      datcoc:500000,
       soluongtoida: 0,
       userid: userId,
       thanhvien: [],
     });
   };
-
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -136,7 +144,6 @@ export default function Room({ route }) {
       // setImage(result.assets[0].uri);
     }
   };
-
   const renderIcons = (room) => {
     return (
       <View style={styles.iconContainer}>
@@ -147,7 +154,7 @@ export default function Room({ route }) {
         <Text style={{ color: "green", fontWeight: "bold", fontSize: 20 }}>
           {room.tenphong}
         </Text>
-        <Text style={styles.iconText}>{room.giaphong}</Text>
+        <Text style={styles.iconText}>{formatPrice(room.giaphong)} đ</Text>
         <View style={styles.horizontalIcons}>
           <View style={styles.roomview}>
             <Icon name="user" size={20} color="#555" style={styles.icon} />
