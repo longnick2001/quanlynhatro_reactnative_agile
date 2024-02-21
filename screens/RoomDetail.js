@@ -14,14 +14,15 @@ import { useNavigation, useIsFocused } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/Ionicons";
 import * as ImagePicker from "expo-image-picker";
 import { getFirestore } from "firebase/firestore";
-import { collection, addDoc, getDocs, getDoc, doc, updateDoc } from "firebase/firestore";
+import { collection, addDoc, getDocs, getDoc, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { app } from "./firebaseConfig";
 
 const RoomDetail = ({ route }) => {
   const [getRoom, setgetRoom] = useState(route.params.getRoom);
   const { userId } = route.params;
-  console.log(userId);
+
   const [nguoithue, setnguoithue] = useState({
+    id: "",
     name: "",
     phone: "",
     gender: "",
@@ -163,9 +164,24 @@ const RoomDetail = ({ route }) => {
     const db = getFirestore(app);
     try {
       const docRef = await addDoc(collection(db, "nguoithuephongs"), nguoithue);
-      setThanhVien(thanhvien.push(docRef.id));
-      console.log("Thêm người thuê thành công: ", docRef.id);
-      updateRoomField(getRoom.roomid, "thanhvien", thanhvien);
+      
+      const updatedIds = [...thanhvien, docRef.id]; // Sử dụng spread operator để thêm ID mới vào mảng
+      setThanhVien(updatedIds);
+      console.log('add: ' + thanhvien);
+      updateRoomField(getRoom.roomid, "thanhvien", updatedIds);
+      const nguoi = ({
+        id: docRef.id,
+        name: nguoithue.name,
+        phone: nguoithue.phone,
+        gender: nguoithue.phone,
+        image: nguoithue.image,
+        roomid: getRoom.roomid,
+        userid: userId,
+      })
+      console.log(nguoi);
+      const newNt = [...nguoithues, nguoithue];
+      setNguoithues(newNt);
+      console.log(JSON.stringify(nguoithues));
 
       setIsModalVisibles(false);
     } catch (e) {
@@ -189,6 +205,7 @@ const RoomDetail = ({ route }) => {
   const [nguoithues, setNguoithues] = useState([]);
   const [xemDanhSach, setXemDanhSach] = useState(false);
   React.useEffect(() => {
+
     const fetchRooms = async () => {
       const roomCollection = collection(db, "nguoithuephongs");
       const querySnapshot = await getDocs(roomCollection);
@@ -196,14 +213,14 @@ const RoomDetail = ({ route }) => {
       querySnapshot.forEach(async (docs) => {
         thanhvien.forEach(async (id) => {
           if (docs.data().userid === userId && id === docs.id) {
-            console.log("fetch" + docs.data());
             //////
             const docRef = doc(db, "rooms", docs.data().roomid);
             const docSnap = await getDoc(docRef);
 
             if (docSnap.exists()) {
-              console.log("Document data:", docSnap.data());
+
               roomList.push({
+                id: docs.id,
                 image: docs.data().image,
                 name: docs.data().name,
                 phone: docs.data().phone,
@@ -224,11 +241,41 @@ const RoomDetail = ({ route }) => {
       setNguoithues(roomList);
     };
     fetchRooms();
+
   }, []);
 
-  const toggleXemDanhSach = ()=>{
+  const toggleXemDanhSach = () => {
     setXemDanhSach(!xemDanhSach);
   }
+
+
+  const deleteNguoiThue = async (item) => {
+    const db = getFirestore(app);
+    const nguoiThueRef = doc(db, 'nguoithuephongs', item.id);
+
+    try {
+      await deleteDoc(nguoiThueRef, item.id);
+      console.log('Người thuê đã được xóa thành công');
+      console.log('delete: ' + thanhvien);
+      try {
+        const update = thanhvien.filter(id => id != item.id);
+        setThanhVien(update);
+        updateRoomField(getRoom.roomid, "thanhvien", update);
+
+        nguoithues.forEach((nguoithue)=>{
+          if(nguoithue.id === item.id){
+            const newNt = nguoithues.filter(nguoi => nguoi != nguoithue);
+            setNguoithues(newNt);
+          }
+        })
+      } catch (e) {
+        console.error("Error delete id: ", e);
+      }
+    } catch (e) {
+
+    }
+  }
+  
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -274,19 +321,19 @@ const RoomDetail = ({ route }) => {
           <Text style={styles.overlayNumber}>{getRoom.datcoc}</Text>
         </View>
       </View>
-      
+
       <TouchableOpacity style={{
-          width: "30%",
-          backgroundColor: "#33CCFF",
-          padding: 12,
-          borderRadius: 40,
-          
-          borderWidth: 2,
-          
-          position:'absolute',
-          right: 10,
-          top: 100
-        }} onPress={toggleXemDanhSach}>
+        width: "30%",
+        backgroundColor: "#33CCFF",
+        padding: 12,
+        borderRadius: 40,
+
+        borderWidth: 2,
+
+        position: 'absolute',
+        right: 10,
+        top: 100
+      }} onPress={toggleXemDanhSach}>
         <Text style={{ textAlign: "center", fontWeight: "bold", color: "white" }}>
           Danh sách
         </Text>
@@ -446,38 +493,41 @@ const RoomDetail = ({ route }) => {
         </View>
       </Modal>
       <Modal visible={xemDanhSach} animationType="slide">
-      <ScrollView style={{ width: "100%"}}>
-      <TouchableOpacity style={{
-          width: "30%",
-          backgroundColor: "#33CCFF",
-          padding: 4,
-          borderRadius: 40,
-          borderWidth: 2,
-          margin:10
-        }} onPress={toggleXemDanhSach}>
-        <Text style={{ textAlign: "center", fontWeight: "bold", color: "white" }}>
-          Đóng
-        </Text>
-      </TouchableOpacity>
-        {nguoithues.map((item, index) => (
-          <View key={index} style={styles.roomItem}>
-            <View style={styles.roomImageContainer}>
-              <Image
-                source={item.image != "" ? { uri: item.image } : require("../assets/images/user.png")}
-                style={styles.roomImage}
-              />
+        <ScrollView style={{ width: "100%" }}>
+          <TouchableOpacity style={{
+            width: "30%",
+            backgroundColor: "#33CCFF",
+            padding: 4,
+            borderRadius: 40,
+            borderWidth: 2,
+            margin: 10
+          }} onPress={toggleXemDanhSach}>
+            <Text style={{ textAlign: "center", fontWeight: "bold", color: "white" }}>
+              Đóng
+            </Text>
+          </TouchableOpacity>
+          {nguoithues.map((item, index) => (
+            <View key={index} style={styles.roomItem}>
+              <View style={styles.roomImageContainer}>
+                <Image
+                  source={item.image != "" ? { uri: item.image } : require("../assets/images/user.png")}
+                  style={styles.roomImage}
+                />
+              </View>
+              <View style={styles.roomDetails}>
+                <Text style={[styles.roomInfo, { fontSize: 20 }]}>
+                  {item.name}
+                </Text>
+                <Text style={styles.roomDescription}>Phòng: {item.tenphong}</Text>
+                <Text style={styles.roomInfo}>Giới tính: {item.gender}</Text>
+                <Text style={styles.roomInfo}>Số điện thoại: {item.phone}</Text>
+              </View>
+              <TouchableOpacity onPress={() => { deleteNguoiThue(item) }}>
+                <Text>Xóa</Text>
+              </TouchableOpacity>
             </View>
-            <View style={styles.roomDetails}>
-              <Text style={[styles.roomInfo, { fontSize: 20 }]}>
-                {item.name}
-              </Text>
-              <Text style={styles.roomDescription}>Phòng: {item.tenphong}</Text>
-              <Text style={styles.roomInfo}>Giới tính: {item.gender}</Text>
-              <Text style={styles.roomInfo}>Số điện thoại: {item.phone}</Text>
-            </View>
-          </View>
-        ))}
-      </ScrollView>
+          ))}
+        </ScrollView>
       </Modal>
     </SafeAreaView>
   );
