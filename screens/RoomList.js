@@ -24,24 +24,16 @@ export default function RoomList({ route }) {
     const fetchRooms = async () => {
       const roomCollection = collection(db, "nguoithuephongs");
       const querySnapshot = await getDocs(roomCollection);
-      const roomList = [{
-        image: "",
-        gender: "",
-        phone: "",
-        name: "",
-        roomid: "",
-        userid: userId,
-        tenphong: ""
-      }];
+      const roomList = [];
       querySnapshot.forEach(async (docs) => {
         if (docs.data().userid === userId) {
-          console.log("fetch" + docs.data());
+          console.log("userid: " + docs.data().userid + ' userId: '+userId);
           //////
           const docRef = doc(db, "rooms", docs.data().roomid);
           const docSnap = await getDoc(docRef);
 
           if (docSnap.exists()) {
-            console.log("Document data:", docSnap.data());
+            
             roomList.push({
               image: docs.data().image,
               name: docs.data().name,
