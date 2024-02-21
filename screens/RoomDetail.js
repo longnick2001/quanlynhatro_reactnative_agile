@@ -14,12 +14,24 @@ import { useNavigation, useIsFocused } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/Ionicons";
 import * as ImagePicker from "expo-image-picker";
 import { getFirestore } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  getDoc,
+  doc,
+  updateDoc,
+} from "firebase/firestore";
 import { collection, addDoc, getDocs, getDoc, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { app } from "./firebaseConfig";
+import DateTimePicker from "react-native-modal-datetime-picker";
 
 const RoomDetail = ({ route }) => {
   const [getRoom, setgetRoom] = useState(route.params.getRoom);
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [selectedMonthYear, setSelectedMonthYear] = useState("");
   const { userId } = route.params;
+  console.log("Tháng: " + selectedMonthYear);
 
   const [nguoithue, setnguoithue] = useState({
     id: "",
@@ -30,16 +42,42 @@ const RoomDetail = ({ route }) => {
     roomid: getRoom.roomid,
     userid: userId,
   });
+
   const defaultImage = require("../assets/Group.png");
   const navigation = useNavigation();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalVisibles, setIsModalVisibles] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
+  const [isModalHD, setisModalHD] = useState(false);
+  const [soDienSuDung, setsoDienSuDung] = useState("");
+  const giaMoiSo = 3500;
+  const [soNuocSuDung, setsoNuocSuDung] = useState("");
+  const giaSoNuoc = 30000;
+  const giaVeSinh = 20000;
+  const [tongTien, setTongTien] = useState("");
+  const [hoaDon, sethoaDon] = useState({
+    tenphong: getRoom.tenphong,
+    thangnam: "",
+    giaphong: getRoom.giaphong,
+    tiendien: "",
+    tiennuoc: "",
+    tienvesinh: giaVeSinh,
+    tongtienphong: "",
+    trangthai: false,
+    roomid: getRoom.roomid,
+    userid: userId,
+  });
+
 
   const isModalUpdate = () => {
     setIsUpdate(!isUpdate);
     delAnh();
   };
+
+  const isModalHoaDon = () => {
+    setisModalHD(!isModalHD);
+  };
+
   const toggleModals = () => {
     setIsModalVisibles(!isModalVisibles);
     setIsModalVisible(false);
@@ -102,7 +140,6 @@ const RoomDetail = ({ route }) => {
   };
 
   const updateRoomData = async () => {
-    console.log("Vào hàm update");
     const firestore = getFirestore(app);
     try {
       await updateDoc(doc(firestore, "rooms", getRoom.roomid), {
@@ -118,7 +155,23 @@ const RoomDetail = ({ route }) => {
       console.error("Error updating Rooms data: ", error);
     }
   };
-
+  //-------------------------------------
+  // const handleThangNam = (value) => {
+  //   sethoaDon({ ...hoaDon, thangnam: value });
+  // };
+  const handleTienDien = (value) => {
+    sethoaDon({ ...hoaDon, tiendien: value * giaMoiSo });
+  };
+  const handleTienNuoc = (value) => {
+    sethoaDon({ ...hoaDon, tiennuoc: value * giaSoNuoc });
+  };
+  // const handleTienVS = (value) =
+  //   sethoaDon({ ...hoaDon, tienvesinh: value });
+  // };
+  // const handleTongTien = (value) => {
+  //   sethoaDon({ ...hoaDon, tongtienphong: value });
+  // };
+  //--------------------------------------
   const handleNameOnChange = (value) => {
     setnguoithue({ ...nguoithue, name: value });
   };
@@ -131,9 +184,10 @@ const RoomDetail = ({ route }) => {
   const handleImageOnChange = (value) => {
     setnguoithue({ ...nguoithue, image: value });
   };
-
+  //--------------------------------------
   const handletenPhong = (value) => {
     setgetRoom({ ...getRoom, tenphong: value });
+    sethoaDon({ ...hoaDon, tenphong: value });
   };
   const handledienTich = (value) => {
     setgetRoom({ ...getRoom, dientich: value });
@@ -153,9 +207,9 @@ const RoomDetail = ({ route }) => {
   const delAnh = () => {
     setgetRoom({ ...getRoom, anhphong: getRoom.anhphong });
   };
+  //--------------------------------------
   const UpdateRoom = () => {
     updateRoomData(getRoom);
-    console.log(getRoom);
     isModalUpdate();
   };
 
@@ -184,6 +238,20 @@ const RoomDetail = ({ route }) => {
       console.log(JSON.stringify(nguoithues));
 
       setIsModalVisibles(false);
+    } catch (e) {
+      console.error("Error adding document: ", e);
+    }
+  };
+
+  //hàm xử lý đưa dữ liệu lên firebase
+  const hoaDonsenDataToFirebase = async () => {
+    console.log(hoaDon);
+    const db = getFirestore(app);
+    try {
+      const docRef = await addDoc(collection(db, "bills"), hoaDon);
+      console.log("Thêm thành công hóa đơn", docRef.id);
+      alert("Thêm thành công");
+      //window.location.reload();
     } catch (e) {
       console.error("Error adding document: ", e);
     }
@@ -229,14 +297,13 @@ const RoomDetail = ({ route }) => {
                 roomid: docs.data().roomid,
                 tenphong: docSnap.data().tenphong,
               });
-
             } else {
               // docSnap.data() will be undefined in this case
               console.log("No such document!");
             }
             //////
           }
-        })
+        });
       });
       setNguoithues(roomList);
     };
@@ -245,7 +312,55 @@ const RoomDetail = ({ route }) => {
   }, []);
 
   const toggleXemDanhSach = () => {
+  const toggleXemDanhSach = () => {
     setXemDanhSach(!xemDanhSach);
+  };
+
+  var tinhTienDien = (soDienSuDung, giaMoiSo) => {
+    const td = soDienSuDung * giaMoiSo;
+    //setTienDien(td);
+    return td;
+  };
+
+  const tinhTienNuoc = (soNuocSuDung, giaSoNuoc) => {
+    const tn = soNuocSuDung * giaSoNuoc;
+    //setTienNuoc(tn);
+    return tn;
+  };
+
+  var soTienDien = tinhTienDien(soDienSuDung, giaMoiSo);
+
+  var soTienNuoc = tinhTienNuoc(soNuocSuDung, giaSoNuoc);
+
+  var newTongTiens = formatPrice(
+    soTienDien + soTienNuoc + giaVeSinh + parseFloat(getRoom.giaphong)
+  );
+
+  useEffect(() => {
+    setTongTien(newTongTiens);
+    sethoaDon({ ...hoaDon, tongtienphong: newTongTiens, thangnam: selectedMonthYear });
+  }, [soTienDien, soTienNuoc,giaVeSinh,getRoom.giaphong, selectedMonthYear])
+
+  const resetValue = () =>{
+    setSelectedMonthYear("");
+    soTienDien = 0;
+  }
+  const showDatePicker = () => {
+    setDatePickerVisibility(true);
+  };
+
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false);
+  };
+
+  const handleConfirm = (date) => {
+    hideDatePicker();
+    // Extract month and year from the selected date
+    const selectedMonth = date.getMonth() + 1; // Month is zero-based, so add 1
+    const selectedYear = date.getFullYear();
+    const formattedDate = `${selectedMonth}/${selectedYear}`;
+    setSelectedMonthYear(formattedDate);
+  };
   }
 
 
@@ -292,7 +407,13 @@ const RoomDetail = ({ route }) => {
       </View>
       <View>
         <Image
-          style={{ width: "100%", height: "60%" }}
+          style={{
+            width: "100%",
+            height: "60%",
+            borderColor: "black",
+            borderWidth: 2,
+            borderRadius: 5,
+          }}
           source={{ uri: getRoom.anhphong }}
         />
         <Text
@@ -321,6 +442,80 @@ const RoomDetail = ({ route }) => {
           <Text style={styles.overlayNumber}>{getRoom.datcoc}</Text>
         </View>
       </View>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "center",
+          marginTop: 60,
+        }}
+      >
+        <TouchableOpacity
+          style={{
+            backgroundColor: "yellow",
+            padding: 12,
+            borderRadius: 10,
+            borderWidth: 2,
+            width: 150,
+            height: 50,
+            marginRight: 20,
+            marginLeft: 20,
+          }}
+          onPress={toggleXemDanhSach}
+        >
+          <Text
+            style={{ textAlign: "center", fontWeight: "bold", color: "black" }}
+          >
+            Danh sách
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{
+            backgroundColor: "#33CCFF",
+            padding: 12,
+            borderRadius: 10,
+            borderWidth: 2,
+            width: 150,
+            height: 50,
+            marginLeft: 20,
+          }}
+          onPress={() => toggleModals(true)}
+        >
+          <Text
+            style={{ textAlign: "center", fontWeight: "bold", color: "white" }}
+          >
+            Thêm người thuê
+          </Text>
+        </TouchableOpacity>
+      </View>
+      <View
+        style={{
+          justifyContent: "center",
+          flexDirection: "row",
+          marginTop: 10,
+        }}
+      >
+        <TouchableOpacity
+          style={{
+            backgroundColor: "red",
+            padding: 12,
+            borderRadius: 10,
+            borderWidth: 2,
+            width: 150,
+            height: 50,
+            marginLeft: 20,
+          }}
+          onPress={() => {
+            isModalHoaDon(true);
+          }}
+        >
+          <Text
+            style={{ textAlign: "center", fontWeight: "bold", color: "white" }}
+          >
+            Tạo hóa đơn
+          </Text>
+        </TouchableOpacity>
+      </View>
+
 
       <TouchableOpacity style={{
         width: "30%",
@@ -359,7 +554,10 @@ const RoomDetail = ({ route }) => {
       <Modal animationType="fade" transparent={true} visible={isModalVisibles}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContents}>
-            <TouchableOpacity onPress={pickImageUser} style={{ marginBottom: 30 }}>
+            <TouchableOpacity
+              onPress={pickImageUser}
+              style={{ marginBottom: 30 }}
+            >
               <Image
                 source={
                   nguoithue && nguoithue.image != ""
@@ -494,6 +692,53 @@ const RoomDetail = ({ route }) => {
       </Modal>
       <Modal visible={xemDanhSach} animationType="slide">
         <ScrollView style={{ width: "100%" }}>
+          <TouchableOpacity
+            style={{
+              width: "30%",
+              backgroundColor: "#33CCFF",
+              padding: 4,
+              borderRadius: 40,
+              borderWidth: 2,
+              margin: 10,
+            }}
+            onPress={toggleXemDanhSach}
+          >
+            <Text
+              style={{
+                textAlign: "center",
+                fontWeight: "bold",
+                color: "white",
+              }}
+            >
+              Đóng
+            </Text>
+          </TouchableOpacity>
+          {nguoithues.map((item, index) => (
+            <View key={index} style={styles.roomItem}>
+              <View style={styles.roomImageContainer}>
+                <Image
+                  source={
+                    item.image != ""
+                      ? { uri: item.image }
+                      : require("../assets/images/user.png")
+                  }
+                  style={styles.roomImage}
+                />
+              </View>
+              <View style={styles.roomDetails}>
+                <Text style={[styles.roomInfo, { fontSize: 20 }]}>
+                  {item.name}
+                </Text>
+                <Text style={styles.roomDescription}>
+                  Phòng: {item.tenphong}
+                </Text>
+                <Text style={styles.roomInfo}>Giới tính: {item.gender}</Text>
+                <Text style={styles.roomInfo}>Số điện thoại: {item.phone}</Text>
+              </View>
+            </View>
+          ))}
+        </ScrollView>
+        <ScrollView style={{ width: "100%" }}>
           <TouchableOpacity style={{
             width: "30%",
             backgroundColor: "#33CCFF",
@@ -529,6 +774,111 @@ const RoomDetail = ({ route }) => {
           ))}
         </ScrollView>
       </Modal>
+      {/* Dialog tạo hóa đơn */}
+      <Modal visible={isModalHD} animationType="slide">
+        <View style={styles.modalContainerz}>
+          <Text style={styles.modalTitle}>
+            Tạo Hóa Đơn Phòng {getRoom.tenphong}
+          </Text>
+          <Text style={{ marginRight: 280, fontWeight: "bold" }}>
+            Tháng - Năm
+          </Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Chọn tháng"
+            value={selectedMonthYear}
+            editable={false} // Đặt editable thành false để ngăn người dùng nhập trực tiếp vào TextInput
+            //onChangeText={handleThangNam}
+          ></TextInput>
+          <TouchableOpacity
+            onPress={showDatePicker}
+            style={{
+              position: "absolute",
+              top: 0,
+              bottom: 0,
+              left: 0,
+              right: 0,
+            }}
+          />
+
+          <Text style={{ marginRight: 290, fontWeight: "bold" }}>
+            Giá phòng
+          </Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Tên phòng"
+            editable={false}
+            //value={formatPrice(getRoom.giaphong)}
+            value={getRoom.giaphong}
+            onChangeText={handlegiaPhong}
+          />
+          <View
+            style={{ flexDirection: "row", justifyContent: "space-between" }}
+          >
+            <Text style={{ fontWeight: "bold", flex: 1, marginLeft: 50 }}>
+              Số điện
+            </Text>
+            <Text style={{ flex: 1, marginLeft: 200 }}>
+              {formatPrice(soTienDien)} đ
+            </Text>
+          </View>
+          <TextInput
+            style={styles.input}
+            placeholder="Số điện"
+            onChangeText={(text) => {
+              setsoDienSuDung(text);
+              handleTienDien(text);
+            }}
+          />
+          <View
+            style={{ flexDirection: "row", justifyContent: "space-between" }}
+          >
+            <Text style={{ fontWeight: "bold", flex: 1, marginLeft: 50 }}>
+              Số nước
+            </Text>
+            <Text style={{ flex: 1, marginLeft: 200 }}>
+              {formatPrice(soTienNuoc)} đ
+            </Text>
+          </View>
+          <TextInput
+            style={styles.input}
+            placeholder="Số nước"
+            onChangeText={(text) => {
+              setsoNuocSuDung(text);
+              handleTienNuoc(text);
+            }}
+          />
+          <Text style={{ marginRight: 300, fontWeight: "bold" }}>Vệ sinh</Text>
+          <TextInput style={styles.input} value={formatPrice(giaVeSinh)} editable={false}/>
+          <Text style={{ marginRight: 300, fontWeight: "bold" }}>
+            Tổng tiền
+          </Text>
+          <TextInput style={styles.inputTT} value={newTongTiens} editable={false}/>
+          <View style={styles.modalButtons}>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={hoaDonsenDataToFirebase}
+            >
+              <Text style={styles.modalButtonText}>Tạo</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={()=>{isModalHoaDon();
+                resetValue();
+              }}
+            >
+              <Text style={styles.modalButtonText}>Hủy</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+      <DateTimePicker
+        isVisible={isDatePickerVisible}
+        mode="date"
+        onConfirm={handleConfirm}
+        onCancel={hideDatePicker}
+        modal={false} // Đặt modal thành false
+      />
     </SafeAreaView>
   );
 };
@@ -613,6 +963,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#FFFF99",
   },
   modalContents: {
     backgroundColor: "#FFF",
@@ -647,18 +998,31 @@ const styles = StyleSheet.create({
   },
   input: {
     width: "80%",
-    height: 40,
+    height: 50,
     marginVertical: 10,
     padding: 10,
     paddingLeft: 30,
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "black",
     borderRadius: 5,
+  },
+  inputTT: {
+    width: "80%",
+    height: 50,
+    marginVertical: 10,
+    padding: 10,
+    paddingLeft: 30,
+    borderWidth: 1,
+    borderColor: "black",
+    borderRadius: 5,
+    color: "red",
+    fontWeight: "bold",
   },
   modalTitle: {
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 20,
+    textAlign: "center",
   },
   modalButtons: {
     flexDirection: "row",
@@ -690,7 +1054,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 5,
-    marginTop: 15
+    marginTop: 15,
   },
   roomDetails: {
     flex: 1,
@@ -706,5 +1070,5 @@ const styles = StyleSheet.create({
   roomDescription: {
     fontSize: 16,
     marginTop: 10,
-  }
+  },
 });

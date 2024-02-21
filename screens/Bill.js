@@ -11,7 +11,6 @@ export default function Bill({ route }) {
   const [room, setRoom] = useState({});
   const db = getFirestore(app);
   React.useEffect(() => {
-
     const fetchRooms = async () => {
       const roomCollection = collection(db, 'bills');
       const querySnapshot = await getDocs(roomCollection);
@@ -19,11 +18,9 @@ export default function Bill({ route }) {
       querySnapshot.forEach(async (docs) => {
         if (docs.data().userid === userId) {
           roomList.push(docs.data());
-
           //////---------------------------------------
           const docRef = doc(db, "rooms", docs.data().roomid);
           const docSnap = await getDoc(docRef);
-
           if (docSnap.exists()) {
             // console.log("Document data:", docSnap.data());
             setRoom(docSnap.data())
@@ -31,7 +28,6 @@ export default function Bill({ route }) {
             // docSnap.data() will be undefined in this case
             console.log("No such document!");
           }
-
           //////-------------------------------------
         }
       });
@@ -56,10 +52,8 @@ export default function Bill({ route }) {
               {item.trangthaithanhtoan && <Text style={[styles.roomInfo, { color: 'white' }]}>Đã thanh toán</Text>}
               {!item.trangthaithanhtoan && <Text style={[styles.roomInfo, { color: 'red' }]}>Chưa thanh toán</Text>}
             </View>
-
           </View>
         ))}
-
       </ScrollView>
     </View>
 
