@@ -223,19 +223,53 @@ const RoomDetail = ({ route }) => {
       setThanhVien(updatedIds);
       console.log("add: " + thanhvien);
       updateRoomField(getRoom.roomid, "thanhvien", updatedIds);
-      const nguoi = {
-        id: docRef.id,
-        name: nguoithue.name,
-        phone: nguoithue.phone,
-        gender: nguoithue.phone,
-        image: nguoithue.image,
-        roomid: getRoom.roomid,
-        userid: userId,
+      // const nguoi = {
+      //   id: docRef.id,
+      //   name: nguoithue.name,
+      //   phone: nguoithue.phone,
+      //   gender: nguoithue.phone,
+      //   image: nguoithue.image,
+      //   roomid: getRoom.roomid,
+      //   userid: userId,
+      // };
+      // console.log(nguoi);
+      // const newNt = [...nguoithues, nguoithue];
+      // setNguoithues(newNt);
+      // console.log(JSON.stringify(nguoithues));
+
+      const fetchRooms = async () => {
+        const roomCollection = collection(db, "nguoithuephongs");
+        const querySnapshot = await getDocs(roomCollection);
+        const roomList = [];
+        querySnapshot.forEach(async (docs) => {
+          thanhvien.forEach(async (id) => {
+            if (docs.data().userid === userId && id === docs.id) {
+              //////
+              const docRef = doc(db, "rooms", docs.data().roomid);
+              const docSnap = await getDoc(docRef);
+  
+              if (docSnap.exists()) {
+                roomList.push({
+                  id: docs.id,
+                  image: docs.data().image,
+                  name: docs.data().name,
+                  phone: docs.data().phone,
+                  gender: docs.data().gender,
+                  userid: docs.data().userid,
+                  roomid: docs.data().roomid,
+                  tenphong: docSnap.data().tenphong,
+                });
+              } else {
+                // docSnap.data() will be undefined in this case
+                console.log("No such document!");
+              }
+              //////
+            }
+          });
+        });
+        setNguoithues(roomList);
       };
-      console.log(nguoi);
-      const newNt = [...nguoithues, nguoithue];
-      setNguoithues(newNt);
-      console.log(JSON.stringify(nguoithues));
+      fetchRooms();
 
       setIsModalVisibles(false);
     } catch (e) {
@@ -273,40 +307,43 @@ const RoomDetail = ({ route }) => {
   const [nguoithues, setNguoithues] = useState([]);
   const [xemDanhSach, setXemDanhSach] = useState(false);
   React.useEffect(() => {
-    const fetchRooms = async () => {
-      const roomCollection = collection(db, "nguoithuephongs");
-      const querySnapshot = await getDocs(roomCollection);
-      const roomList = [];
-      querySnapshot.forEach(async (docs) => {
-        thanhvien.forEach(async (id) => {
-          if (docs.data().userid === userId && id === docs.id) {
-            //////
-            const docRef = doc(db, "rooms", docs.data().roomid);
-            const docSnap = await getDoc(docRef);
-
-            if (docSnap.exists()) {
-              roomList.push({
-                id: docs.id,
-                image: docs.data().image,
-                name: docs.data().name,
-                phone: docs.data().phone,
-                gender: docs.data().gender,
-                userid: docs.data().userid,
-                roomid: docs.data().roomid,
-                tenphong: docSnap.data().tenphong,
-              });
-            } else {
-              // docSnap.data() will be undefined in this case
-              console.log("No such document!");
+    const getNguoiThue = navigation.addListener('focus', () => {
+      const fetchRooms = async () => {
+        const roomCollection = collection(db, "nguoithuephongs");
+        const querySnapshot = await getDocs(roomCollection);
+        const roomList = [];
+        querySnapshot.forEach(async (docs) => {
+          thanhvien.forEach(async (id) => {
+            if (docs.data().userid === userId && id === docs.id) {
+              //////
+              const docRef = doc(db, "rooms", docs.data().roomid);
+              const docSnap = await getDoc(docRef);
+  
+              if (docSnap.exists()) {
+                roomList.push({
+                  id: docs.id,
+                  image: docs.data().image,
+                  name: docs.data().name,
+                  phone: docs.data().phone,
+                  gender: docs.data().gender,
+                  userid: docs.data().userid,
+                  roomid: docs.data().roomid,
+                  tenphong: docSnap.data().tenphong,
+                });
+              } else {
+                // docSnap.data() will be undefined in this case
+                console.log("No such document!");
+              }
+              //////
             }
-            //////
-          }
+          });
         });
-      });
-      setNguoithues(roomList);
-    };
-    fetchRooms();
-  }, []);
+        setNguoithues(roomList);
+      };
+      fetchRooms();
+    });
+    return getNguoiThue;
+  }, [navigation]);
 
     const toggleXemDanhSach = () => {
       setXemDanhSach(!xemDanhSach);
@@ -385,6 +422,10 @@ const RoomDetail = ({ route }) => {
       }
     } catch (e) {}
   };
+
+  const updateNguoiThue = ()=>{
+    
+  }
 
   return (
     <SafeAreaView style={styles.container}>
