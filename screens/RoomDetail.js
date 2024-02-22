@@ -397,7 +397,7 @@ const RoomDetail = ({ route }) => {
           style={{ marginLeft: "auto" }}
           onPress={isModalUpdate}
         >
-          <Icon name="sync" size={24} color="black" />
+          <Icon name="pencil" size={24} color="black" />
         </TouchableOpacity>
       </View>
       <View>

@@ -23,7 +23,7 @@ export default function SignupScreen() {
   // Hàm kiểm tra xem tên người dùng có đúng kiểu không
   const isValidUsername = (username) => {
     // Biểu thức chính quy để kiểm tra tên người dùng
-    const usernameRegex = /^[a-zA-Z0-9_]{4,}$/;
+    const usernameRegex = /^[a-zA-Z0-9\s\p{L}]{4,}$/u;
     return usernameRegex.test(username);
   };
 
@@ -86,8 +86,8 @@ const isValidPhoneNumber = (phoneNumber) => {
     try {
       const querySnapshot = await getDocs(usersCollection);
       querySnapshot.forEach((doc) => {
-        if (user.name === doc.data().name && user.phone === doc.data().phone) {
-          Alert.alert("Tài khoản đã tồn tại");
+        if (user.phone === doc.data().phone) {
+          Alert.alert("Tài khoản đã tồn tại", 'Số điện thoại đã được đăng ký');
           setIsSignUp(false);
           setUser({
             name: "",
@@ -98,6 +98,18 @@ const isValidPhoneNumber = (phoneNumber) => {
           return;
         }
       });
+
+      if (!isValidUsername(user.name)) {
+        Alert.alert('Tên người dùng không hợp lệ', 'Tên người dùng phải chứa ít nhất 4 ký tự và chỉ được bao gồm chữ cái, số và dấu gạch dưới.');
+        setIsSignUp(false);
+        return;
+      }
+
+      if (!isValidPhoneNumber(user.phone)) {
+        Alert.alert('Số điện thoại không hợp lệ', 'Số điện thoại phải chứa chính xác 10 chữ số.');
+        setIsSignUp(false);
+        return;
+      }
 
       if (isValid) {
         senDataToFirebase(user);
