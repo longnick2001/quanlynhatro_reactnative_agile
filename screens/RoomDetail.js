@@ -21,8 +21,8 @@ import {
   getDoc,
   doc,
   updateDoc,
+  deleteDoc
 } from "firebase/firestore";
-import { collection, addDoc, getDocs, getDoc, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { app } from "./firebaseConfig";
 import DateTimePicker from "react-native-modal-datetime-picker";
 
@@ -44,7 +44,7 @@ const RoomDetail = ({ route }) => {
     userid: userId,
   });
 
-  const defaultImage = require("../assets/Group.png");
+  const defaultImage = require("../assets/images/user.png");
   const navigation = useNavigation();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalVisibles, setIsModalVisibles] = useState(false);
@@ -68,7 +68,6 @@ const RoomDetail = ({ route }) => {
     roomid: getRoom.roomid,
     userid: userId,
   });
-
 
   const isModalUpdate = () => {
     setIsUpdate(!isUpdate);
@@ -219,12 +218,12 @@ const RoomDetail = ({ route }) => {
     const db = getFirestore(app);
     try {
       const docRef = await addDoc(collection(db, "nguoithuephongs"), nguoithue);
-      
+
       const updatedIds = [...thanhvien, docRef.id]; // Sử dụng spread operator để thêm ID mới vào mảng
       setThanhVien(updatedIds);
-      console.log('add: ' + thanhvien);
+      console.log("add: " + thanhvien);
       updateRoomField(getRoom.roomid, "thanhvien", updatedIds);
-      const nguoi = ({
+      const nguoi = {
         id: docRef.id,
         name: nguoithue.name,
         phone: nguoithue.phone,
@@ -232,7 +231,7 @@ const RoomDetail = ({ route }) => {
         image: nguoithue.image,
         roomid: getRoom.roomid,
         userid: userId,
-      })
+      };
       console.log(nguoi);
       const newNt = [...nguoithues, nguoithue];
       setNguoithues(newNt);
@@ -274,7 +273,6 @@ const RoomDetail = ({ route }) => {
   const [nguoithues, setNguoithues] = useState([]);
   const [xemDanhSach, setXemDanhSach] = useState(false);
   React.useEffect(() => {
-
     const fetchRooms = async () => {
       const roomCollection = collection(db, "nguoithuephongs");
       const querySnapshot = await getDocs(roomCollection);
@@ -287,7 +285,6 @@ const RoomDetail = ({ route }) => {
             const docSnap = await getDoc(docRef);
 
             if (docSnap.exists()) {
-
               roomList.push({
                 id: docs.id,
                 image: docs.data().image,
@@ -309,13 +306,12 @@ const RoomDetail = ({ route }) => {
       setNguoithues(roomList);
     };
     fetchRooms();
-
   }, []);
 
-  const toggleXemDanhSach = () => {
-  const toggleXemDanhSach = () => {
-    setXemDanhSach(!xemDanhSach);
-  };
+    const toggleXemDanhSach = () => {
+      setXemDanhSach(!xemDanhSach);
+    };
+
 
   var tinhTienDien = (soDienSuDung, giaMoiSo) => {
     const td = soDienSuDung * giaMoiSo;
@@ -337,14 +333,18 @@ const RoomDetail = ({ route }) => {
 
   useEffect(() => {
     setTongTien(newTongTiens);
-    sethoaDon({ ...hoaDon, tongtienphong: newTongTiens, thangnam: selectedMonthYear });
-  }, [soTienDien, soTienNuoc,giaVeSinh,getRoom.giaphong, selectedMonthYear])
+    sethoaDon({
+      ...hoaDon,
+      tongtienphong: newTongTiens,
+      thangnam: selectedMonthYear,
+    });
+  }, [soTienDien, soTienNuoc, giaVeSinh, getRoom.giaphong, selectedMonthYear]);
 
-  const resetValue = () =>{
+  const resetValue = () => {
     setSelectedMonthYear("");
     soTienDien = 0;
-  }
-  const showDatePicker = () => {
+  };
+  const showDatePickers = () => {
     setDatePickerVisibility(true);
   };
 
@@ -360,36 +360,32 @@ const RoomDetail = ({ route }) => {
     const formattedDate = `${selectedMonth}/${selectedYear}`;
     setSelectedMonthYear(formattedDate);
   };
-  }
-
-
   const deleteNguoiThue = async (item) => {
+    console.log("Chạy")
     const db = getFirestore(app);
-    const nguoiThueRef = doc(db, 'nguoithuephongs', item.id);
+    const nguoiThueRef = doc(db, "nguoithuephongs", item.id);
 
     try {
       await deleteDoc(nguoiThueRef, item.id);
-      console.log('Người thuê đã được xóa thành công');
-      console.log('delete: ' + thanhvien);
+      console.log("Người thuê đã được xóa thành công");
+      console.log("delete: " + thanhvien);
       try {
-        const update = thanhvien.filter(id => id != item.id);
+        const update = thanhvien.filter((id) => id != item.id);
         setThanhVien(update);
         updateRoomField(getRoom.roomid, "thanhvien", update);
 
-        nguoithues.forEach((nguoithue)=>{
-          if(nguoithue.id === item.id){
-            const newNt = nguoithues.filter(nguoi => nguoi != nguoithue);
+        nguoithues.forEach((nguoithue) => {
+          if (nguoithue.id === item.id) {
+            const newNt = nguoithues.filter((nguoi) => nguoi != nguoithue);
             setNguoithues(newNt);
           }
-        })
+        });
       } catch (e) {
         console.error("Error delete id: ", e);
       }
-    } catch (e) {
+    } catch (e) {}
+  };
 
-    }
-  }
-  
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -412,8 +408,8 @@ const RoomDetail = ({ route }) => {
             borderColor: "green",
             borderWidth: 2,
             borderRadius: 5,
-            marginLeft:10,
-            marginRight: 10
+            marginLeft: 10,
+            marginRight: 10,
           }}
           source={{ uri: getRoom.anhphong }}
         />
@@ -440,7 +436,9 @@ const RoomDetail = ({ route }) => {
           <Text style={styles.overlayText}>Mô tả</Text>
           <Text style={styles.overlayNumbers}>{getRoom.mota}</Text>
           <Text style={styles.overlayText}>Đặt cọc</Text>
-          <Text style={styles.overlayNumber}>{formatPrice(getRoom.datcoc)} đ</Text>
+          <Text style={styles.overlayNumber}>
+            {formatPrice(getRoom.datcoc)} đ
+          </Text>
         </View>
       </View>
       <View
@@ -517,23 +515,7 @@ const RoomDetail = ({ route }) => {
         </TouchableOpacity>
       </View>
 
-
-      <TouchableOpacity style={{
-        width: "30%",
-        backgroundColor: "#33CCFF",
-        padding: 12,
-        borderRadius: 40,
-
-        borderWidth: 2,
-
-        position: 'absolute',
-        right: 10,
-        top: 100
-      }} onPress={toggleXemDanhSach}>
-        <Text style={{ textAlign: "center", fontWeight: "bold", color: "white" }}>
-          Danh sách
-        </Text>
-      </TouchableOpacity>
+      
       <TouchableOpacity
         style={{
           width: "50%",
@@ -695,7 +677,7 @@ const RoomDetail = ({ route }) => {
         </View>
       </Modal>
       <Modal visible={xemDanhSach} animationType="slide">
-        <ScrollView style={{ width: "100%" }}>
+        <ScrollView style={{ width: "100%", backgroundColor:'#FFFF99' }}>
           <TouchableOpacity
             style={{
               width: "30%",
@@ -739,39 +721,11 @@ const RoomDetail = ({ route }) => {
                 <Text style={styles.roomInfo}>Giới tính: {item.gender}</Text>
                 <Text style={styles.roomInfo}>Số điện thoại: {item.phone}</Text>
               </View>
-            </View>
-          ))}
-        </ScrollView>
-        <ScrollView style={{ width: "100%" }}>
-          <TouchableOpacity style={{
-            width: "30%",
-            backgroundColor: "#33CCFF",
-            padding: 4,
-            borderRadius: 40,
-            borderWidth: 2,
-            margin: 10
-          }} onPress={toggleXemDanhSach}>
-            <Text style={{ textAlign: "center", fontWeight: "bold", color: "white" }}>
-              Đóng
-            </Text>
-          </TouchableOpacity>
-          {nguoithues.map((item, index) => (
-            <View key={index} style={styles.roomItem}>
-              <View style={styles.roomImageContainer}>
-                <Image
-                  source={item.image != "" ? { uri: item.image } : require("../assets/images/user.png")}
-                  style={styles.roomImage}
-                />
-              </View>
-              <View style={styles.roomDetails}>
-                <Text style={[styles.roomInfo, { fontSize: 20 }]}>
-                  {item.name}
-                </Text>
-                <Text style={styles.roomDescription}>Phòng: {item.tenphong}</Text>
-                <Text style={styles.roomInfo}>Giới tính: {item.gender}</Text>
-                <Text style={styles.roomInfo}>Số điện thoại: {item.phone}</Text>
-              </View>
-              <TouchableOpacity onPress={() => { deleteNguoiThue(item) }}>
+              <TouchableOpacity
+                onPress={() => {
+                  deleteNguoiThue(item);
+                }}
+              >
                 <Text>Xóa</Text>
               </TouchableOpacity>
             </View>
@@ -795,7 +749,7 @@ const RoomDetail = ({ route }) => {
             //onChangeText={handleThangNam}
           ></TextInput>
           <TouchableOpacity
-            onPress={showDatePicker}
+            onPress={showDatePickers}
             style={{
               position: "absolute",
               top: 0,
@@ -853,23 +807,33 @@ const RoomDetail = ({ route }) => {
             }}
           />
           <Text style={{ marginRight: 300, fontWeight: "bold" }}>Vệ sinh</Text>
-          <TextInput style={styles.input} value={formatPrice(giaVeSinh)} editable={false}/>
+          <TextInput
+            style={styles.input}
+            value={formatPrice(giaVeSinh)}
+            editable={false}
+          />
           <Text style={{ marginRight: 300, fontWeight: "bold" }}>
             Tổng tiền
           </Text>
-          <TextInput style={styles.inputTT} value={newTongTiens} editable={false}/>
+          <TextInput
+            style={styles.inputTT}
+            value={newTongTiens}
+            editable={false}
+          />
           <View style={styles.modalButtons}>
             <TouchableOpacity
               style={styles.modalButton}
-              onPress={() =>{
+              onPress={() => {
                 hoaDonsenDataToFirebase();
-                isModalHoaDon();}}
+                isModalHoaDon();
+              }}
             >
               <Text style={styles.modalButtonText}>Tạo</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.modalButton}
-              onPress={()=>{isModalHoaDon();
+              onPress={() => {
+                isModalHoaDon();
                 resetValue();
               }}
             >
@@ -977,8 +941,8 @@ const styles = StyleSheet.create({
     margin: 20,
     width: "90%",
     borderRadius: 10,
-    borderColor:'#33CCFF',
-    borderWidth: 2
+    borderColor: "#33CCFF",
+    borderWidth: 2,
   },
   saveButton: {
     backgroundColor: "blue",
@@ -1052,23 +1016,29 @@ const styles = StyleSheet.create({
     margin: 5,
     borderWidth: 1,
     borderColor: "#ccc",
-    borderRadius: 5,
+    borderRadius: 10,
     flexDirection: "row",
+    backgroundColor:'white'
   },
   roomImageContainer: {
     marginRight: 10,
   },
   roomImage: {
     width: 100,
-    height: 100,
-    borderRadius: 5,
-    marginTop: 15,
+    height: 115,
+    borderRadius: 15,
+    borderColor:'black',
+    borderWidth: 1,
+    alignItems:'center'
   },
   roomDetails: {
     flex: 1,
     backgroundColor: "#10DEDE",
     borderRadius: 10,
-    padding: 8,
+    width: '80%',
+    justifyContent:'center',
+    textAlign:'center',
+    paddingLeft: 10
   },
   roomInfo: {
     fontSize: 16,

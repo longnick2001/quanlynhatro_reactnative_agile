@@ -55,6 +55,7 @@ export default function Room({ route }) {
     });
     return unsubscribe;
   }, [navigation]);
+  
   function formatPrice(price) {
     price = String(price);
     if (price.length >= 4) {

@@ -13,12 +13,13 @@ import { DocumentReference, getFirestore } from "firebase/firestore";
 import { collection, doc, getDocs, getDoc, addDoc } from "firebase/firestore";
 import { app } from "./firebaseConfig";
 import Icon from "react-native-vector-icons/FontAwesome";
-
+import { useNavigation } from "@react-navigation/native";
 export default function RoomList({ route }) {
   const userId = route.params.userId[0];
   const [nguoithue, setNguoithues] = useState([]);
   const db = getFirestore(app);
   const [searchText, setSearchText] = useState("");
+  const navigation = useNavigation();
 
   React.useEffect(() => {
     const fetchRooms = async () => {
@@ -27,13 +28,10 @@ export default function RoomList({ route }) {
       const roomList = [];
       querySnapshot.forEach(async (docs) => {
         if (docs.data().userid === userId) {
-          console.log("userid: " + docs.data().userid + ' userId: '+userId);
-          //////
+          console.log("userid: " + docs.data().userid + " userId: " + userId);
           const docRef = doc(db, "rooms", docs.data().roomid);
           const docSnap = await getDoc(docRef);
-
           if (docSnap.exists()) {
-            
             roomList.push({
               image: docs.data().image,
               name: docs.data().name,
@@ -43,7 +41,6 @@ export default function RoomList({ route }) {
               roomid: docs.data().roomid,
               tenphong: docSnap.data().tenphong,
             });
-
           } else {
             // docSnap.data() will be undefined in this case
             console.log("No such document!");
@@ -77,7 +74,7 @@ export default function RoomList({ route }) {
     name: "",
     roomid: "",
     userid: userId,
-    tenphong: ""
+    tenphong: "",
   });
 
   const toggleModal = () => {
@@ -100,7 +97,11 @@ export default function RoomList({ route }) {
           <View key={index} style={styles.roomItem}>
             <View style={styles.roomImageContainer}>
               <Image
-                source={item.image != "" ? { uri: item.image } : require("../assets/images/user.png")}
+                source={
+                  item.image != ""
+                    ? { uri: item.image }
+                    : require("../assets/images/user.png")
+                }
                 style={styles.roomImage}
               />
             </View>
@@ -140,7 +141,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 5,
-    marginTop: 15
+    marginTop: 15,
   },
   fabText: {
     fontSize: 24,
