@@ -1,26 +1,45 @@
-import { View, Text, Image, TextInput, TouchableOpacity, Alert, StyleSheet } from 'react-native'
-import React, { useState } from 'react'
-import { StatusBar } from 'expo-status-bar'
-import { useNavigation } from '@react-navigation/native'
+import {
+  View,
+  Text,
+  Image,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  StyleSheet,
+} from "react-native";
+import React, { useState } from "react";
+import { StatusBar } from "expo-status-bar";
+import { useNavigation } from "@react-navigation/native";
 //firebase
 import { getFirestore } from "firebase/firestore";
 import { collection, addDoc, getDocs } from "firebase/firestore";
 import { app } from "./firebaseConfig";
 //progress
-import * as Progress from 'react-native-progress';
-
+import * as Progress from "react-native-progress";
 
 export default function SignupScreen() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [selectedGender, setSelectedGender] = useState(null);
+  // Hàm kiểm tra xem tên người dùng có đúng kiểu không
+  const isValidUsername = (username) => {
+    // Biểu thức chính quy để kiểm tra tên người dùng
+    const usernameRegex = /^[a-zA-Z0-9_]{4,}$/;
+    return usernameRegex.test(username);
+  };
 
+  // Hàm kiểm tra xem số điện thoại có đúng kiểu không
+const isValidPhoneNumber = (phoneNumber) => {
+  // Biểu thức chính quy để kiểm tra số điện thoại
+  const phoneNumberRegex = /^[0-9]{10}$/;
+  return phoneNumberRegex.test(phoneNumber);
+};
   //navigation
   const navigation = useNavigation();
   const [user, setUser] = useState({
-    name: '',
-    pass: '',
-    phone: '',
-    gender: ''
+    name: "",
+    pass: "",
+    phone: "",
+    gender: "",
   });
 
   // Hàm xử lý khi thay đổi giá trị của trường name
@@ -41,7 +60,6 @@ export default function SignupScreen() {
     setUser({ ...user, gender: gender });
   };
 
-
   //hàm xử lý đưa dữ liệu lên firebase
   const senDataToFirebase = async (user) => {
     const db = getFirestore(app);
@@ -52,10 +70,10 @@ export default function SignupScreen() {
         phone: user.phone,
         pass: user.pass,
         gender: user.gender,
-        dob: '',
-        image: ''
+        dob: "",
+        image: "",
       });
-      navigation.push('Login')
+      navigation.push("Login");
     } catch (e) {
       console.error("Error adding document: ", e);
     }
@@ -63,27 +81,29 @@ export default function SignupScreen() {
 
   const getDataFromFirebase = async (user) => {
     const db = getFirestore(app);
-    const usersCollection = collection(db, 'users');
+    const usersCollection = collection(db, "users");
     let isValid = true;
     try {
       const querySnapshot = await getDocs(usersCollection);
       querySnapshot.forEach((doc) => {
         if (user.name === doc.data().name && user.phone === doc.data().phone) {
-          Alert.alert('Tài khoản đã tồn tại');
+          Alert.alert("Tài khoản đã tồn tại");
           setIsSignUp(false);
           setUser({
-            name: '',
-            phone: '',
-            pass: ''
+            name: "",
+            phone: "",
+            pass: "",
           });
           isValid = false;
-          return
+          return;
         }
       });
 
       if (isValid) {
         senDataToFirebase(user);
-        Alert.alert('Đăng ký thành công', 'Tài khoản của bạn đã được tạo.', [{ text: 'OK' }]);
+        Alert.alert("Đăng ký thành công", "Tài khoản của bạn đã được tạo.", [
+          { text: "OK" },
+        ]);
       }
     } catch (e) {
       console.error("Error getting documents: ", e);
@@ -94,19 +114,36 @@ export default function SignupScreen() {
   const SignUp = () => {
     setIsSignUp(true);
     getDataFromFirebase(user);
-  }
+  };
 
   return (
     <View className="bg-white h-full w-full">
-      <StatusBar style='light' />
-      <Image style={{ width: '100%', height: '80%', position: 'absolute' }} source={require('../assets/images/background.png')} />
+      <StatusBar style="light" />
+      <Image
+        style={{ width: "100%", height: "80%", position: "absolute" }}
+        source={require("../assets/images/background.png")}
+      />
       {/* lights */}
       <View className="flex-row justify-around w-full absolute">
-        <Image className="h-[160] w-[65]" source={require('../assets/images/light.png')} />
-        <Image className="h-[160] w-[65]" source={require('../assets/images/light.png')} />
+        <Image
+          className="h-[160] w-[65]"
+          source={require("../assets/images/light.png")}
+        />
+        <Image
+          className="h-[160] w-[65]"
+          source={require("../assets/images/light.png")}
+        />
       </View>
       {/* title and form */}
-      <View style={{ height: '100%', width: '100%', flex: 1, justifyContent: 'space-around', paddingTop: 100 }}>
+      <View
+        style={{
+          height: "100%",
+          width: "100%",
+          flex: 1,
+          justifyContent: "space-around",
+          paddingTop: 100,
+        }}
+      >
         {/* title */}
         <View className="flex items-center">
           <Text className="text-white font-bold tracking-wider text-5xl">
@@ -116,16 +153,38 @@ export default function SignupScreen() {
         {/* form */}
         <View className="flex items-center mx-4 space-y-4">
           <View className="bg-black/5 p-5 rounded-2xl w-full">
-            {user.name == "" && <Text className="text-red font-normal">Nhập họ và tên</Text>}
-            <TextInput placeholder='Username' placeholderTextColor={'gray'} value={user.name} onChangeText={handleNameChange} />
+            {user.name == "" && (
+              <Text className="text-red font-normal">Nhập họ và tên</Text>
+            )}
+            <TextInput
+              placeholder="Username"
+              placeholderTextColor={"gray"}
+              value={user.name}
+              onChangeText={handleNameChange}
+            />
           </View>
           <View className="bg-black/5 p-5 rounded-2xl w-full">
-            {user.phone == "" && <Text className="text-red font-normal">Nhập số điện thoại</Text>}
-            <TextInput placeholder='Phone number' placeholderTextColor={'gray'} value={user.phone} onChangeText={handleEmailChange} />
+            {user.phone == "" && (
+              <Text className="text-red font-normal">Nhập số điện thoại</Text>
+            )}
+            <TextInput
+              placeholder="Phone number"
+              placeholderTextColor={"gray"}
+              value={user.phone}
+              onChangeText={handleEmailChange}
+            />
           </View>
           <View className="bg-black/5 p-5 rounded-2xl w-full mb-3">
-            {user.pass == "" && <Text className="text-red font-normal">Nhập mật khẩu</Text>}
-            <TextInput placeholder='Password' placeholderTextColor={'gray'} secureTextEntry value={user.pass} onChangeText={handlePassChange} />
+            {user.pass == "" && (
+              <Text className="text-red font-normal">Nhập mật khẩu</Text>
+            )}
+            <TextInput
+              placeholder="Password"
+              placeholderTextColor={"gray"}
+              secureTextEntry
+              value={user.pass}
+              onChangeText={handlePassChange}
+            />
           </View>
           {/* <View style={styles.container}>
             <TouchableOpacity
@@ -139,56 +198,65 @@ export default function SignupScreen() {
               <Text style={styles.optionText}>Nữ</Text>
             </TouchableOpacity>
           </View> */}
-          <View className='w-full'>
-            {user.name != '' &&
-              user.phone != '' &&
-              user.pass != '' &&
-              !isSignUp &&
-              <TouchableOpacity className='w-full bg-sky-400 p-3 rounded-2xl mb-3'
-                onPress={SignUp}>
-                <Text className='text-xl font-bold text-white text-center'>SignUp</Text>
-              </TouchableOpacity>}
-            {isSignUp &&
-              <Progress.Circle size={30} indeterminate={true} style={{ alignSelf: 'center' }} />
-            }
+          <View className="w-full">
+            {user.name != "" &&
+              user.phone != "" &&
+              user.pass != "" &&
+              !isSignUp && (
+                <TouchableOpacity
+                  className="w-full bg-sky-400 p-3 rounded-2xl mb-3"
+                  onPress={SignUp}
+                >
+                  <Text className="text-xl font-bold text-white text-center">
+                    SignUp
+                  </Text>
+                </TouchableOpacity>
+              )}
+            {isSignUp && (
+              <Progress.Circle
+                size={30}
+                indeterminate={true}
+                style={{ alignSelf: "center" }}
+              />
+            )}
           </View>
           <View className="flex-row justify-center">
             <Text>Already have an account?</Text>
-            <TouchableOpacity onPress={() => navigation.push('Login')}>
+            <TouchableOpacity onPress={() => navigation.push("Login")}>
               <Text className="text-sky-600"> Login</Text>
             </TouchableOpacity>
           </View>
         </View>
       </View>
     </View>
-  )
+  );
 }
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    flexDirection: 'row'
+    alignItems: "center",
+    justifyContent: "space-between",
+    flexDirection: "row",
   },
   title: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 20,
   },
   option: {
     padding: 10,
     marginVertical: 5,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 5,
-    margin:15
+    margin: 15,
   },
   selectedOption: {
     padding: 10,
     marginVertical: 5,
     borderWidth: 1,
-    borderColor: 'blue',
+    borderColor: "blue",
     borderRadius: 5,
-    backgroundColor: 'lightblue',
+    backgroundColor: "lightblue",
   },
   optionText: {
     fontSize: 16,

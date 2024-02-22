@@ -13,45 +13,58 @@ import { DocumentReference, getFirestore } from "firebase/firestore";
 import { collection, doc, getDocs, getDoc, addDoc } from "firebase/firestore";
 import { app } from "./firebaseConfig";
 import Icon from "react-native-vector-icons/FontAwesome";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useIsFocused } from "@react-navigation/native";
 export default function RoomList({ route }) {
   const userId = route.params.userId[0];
   const [nguoithue, setNguoithues] = useState([]);
-  const db = getFirestore(app);
   const [searchText, setSearchText] = useState("");
   const navigation = useNavigation();
+  const isFocused = useIsFocused();
+
+  const fetchRooms = async () => {
+    const db = getFirestore(app);
+    const roomCollection = collection(db, "nguoithuephongs");
+    const querySnapshot = await getDocs(roomCollection);
+    const promises = []; // Mảng chứa các promise
+    const roomList = [];
+
+    querySnapshot.forEach((docs) => {
+      if (docs.data().userid === userId) {
+        const docRef = doc(db, "rooms", docs.data().roomid);
+        const promise = getDoc(docRef)
+          .then((docSnap) => {
+            if (docSnap.exists()) {
+              const user = {
+                image: docs.data().image,
+                name: docs.data().name,
+                phone: docs.data().phone,
+                gender: docs.data().gender,
+                userid: docs.data().userid,
+                roomid: docs.data().roomid,
+                tenphong: docSnap.data().tenphong,
+              };
+              roomList.push(user);
+            }
+          })
+          .catch((error) => {
+            console.error("Error getting document:", error);
+          });
+        promises.push(promise);
+      }
+    });
+
+    // Sử dụng Promise.all để đợi tất cả các promise hoàn thành
+    await Promise.all(promises);
+
+    // Cập nhật state sau khi tất cả các promise đã hoàn thành
+    setNguoithues(roomList);
+  };
 
   React.useEffect(() => {
-    const fetchRooms = async () => {
-      const roomCollection = collection(db, "nguoithuephongs");
-      const querySnapshot = await getDocs(roomCollection);
-      const roomList = [];
-      querySnapshot.forEach(async (docs) => {
-        if (docs.data().userid === userId) {
-          console.log("userid: " + docs.data().userid + " userId: " + userId);
-          const docRef = doc(db, "rooms", docs.data().roomid);
-          const docSnap = await getDoc(docRef);
-          if (docSnap.exists()) {
-            roomList.push({
-              image: docs.data().image,
-              name: docs.data().name,
-              phone: docs.data().phone,
-              gender: docs.data().gender,
-              userid: docs.data().userid,
-              roomid: docs.data().roomid,
-              tenphong: docSnap.data().tenphong,
-            });
-          } else {
-            // docSnap.data() will be undefined in this case
-            console.log("No such document!");
-          }
-          //////
-        }
-      });
-      setNguoithues(roomList);
-    };
-    fetchRooms();
-  }, []);
+    if (isFocused) {
+      fetchRooms();
+    }
+  }, [isFocused]);
 
   // Thêm hàm xử lý tìm kiếm
   const filterRooms = (text) => {
