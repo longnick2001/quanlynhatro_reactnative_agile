@@ -232,7 +232,7 @@ const RoomDetail = ({ route }) => {
         roomid: getRoom.roomid,
         userid: userId,
       };
-      
+
       const newNt = [nguoi, ...nguoithues];
       setNguoithues(newNt);
 
@@ -283,7 +283,7 @@ const RoomDetail = ({ route }) => {
               //////
               const docRef = doc(db, "rooms", docs.data().roomid);
               const docSnap = await getDoc(docRef);
-  
+
               if (docSnap.exists()) {
                 roomList.push({
                   id: docs.id,
@@ -310,9 +310,9 @@ const RoomDetail = ({ route }) => {
     return getNguoiThue;
   }, [navigation]);
 
-    const toggleXemDanhSach = () => {
-      setXemDanhSach(!xemDanhSach);
-    };
+  const toggleXemDanhSach = () => {
+    setXemDanhSach(!xemDanhSach);
+  };
 
 
   var tinhTienDien = (soDienSuDung, giaMoiSo) => {
@@ -363,7 +363,7 @@ const RoomDetail = ({ route }) => {
     setSelectedMonthYear(formattedDate);
   };
   const deleteNguoiThue = async (item) => {
-    console.log("Chạy: "+item.id)
+    console.log("Chạy: " + item.id)
     const db = getFirestore(app);
     const nguoiThueRef = doc(db, "nguoithuephongs", item.id);
 
@@ -385,15 +385,21 @@ const RoomDetail = ({ route }) => {
       } catch (e) {
         console.error("Error delete id: ", e);
       }
-    } catch (e) {}
+    } catch (e) { }
   };
 
-  const xoaPhong = async ()=>{
-    console.log('click: '+getRoom.roomid);
+  const xoaPhong = async () => {
+    console.log('click: ' + getRoom.roomid);
     const db = getFirestore(app);
     const roomRef = doc(db, "rooms", getRoom.roomid);
     try {
-      console.log('try: '+getRoom.roomid);
+      // xoa het nguoi trong phong khi xoa phong
+      thanhvien.forEach(async (id) => {
+          const docRef = doc(db, "nguoithuephongs", id);
+          await deleteDoc(docRef, id);
+      });
+
+      console.log('try: ' + getRoom.roomid);
       await deleteDoc(roomRef, getRoom.id);
       console.log('Xóa thành công');
       handleBackPress();
@@ -518,7 +524,7 @@ const RoomDetail = ({ route }) => {
             width: 150,
             height: 50,
             marginLeft: 20,
-            marginRight:20
+            marginRight: 20
           }}
           onPress={() => {
             isModalHoaDon(true);
@@ -539,9 +545,9 @@ const RoomDetail = ({ route }) => {
             width: 150,
             height: 50,
             marginLeft: 20,
-            
+
           }}
-          onPress={()=>{xoaPhong(getRoom)}
+          onPress={() => { xoaPhong(getRoom) }
           }
         >
           <Text
@@ -552,7 +558,7 @@ const RoomDetail = ({ route }) => {
         </TouchableOpacity>
       </View>
 
-      
+
       <TouchableOpacity
         style={{
           width: "50%",
@@ -714,7 +720,7 @@ const RoomDetail = ({ route }) => {
         </View>
       </Modal>
       <Modal visible={xemDanhSach} animationType="slide">
-        <ScrollView style={{ width: "100%", backgroundColor:'#FFFF99' }}>
+        <ScrollView style={{ width: "100%", backgroundColor: '#FFFF99' }}>
           <TouchableOpacity
             style={{
               width: "30%",
@@ -783,7 +789,7 @@ const RoomDetail = ({ route }) => {
             placeholder="Chọn tháng"
             value={selectedMonthYear}
             editable={false} // Đặt editable thành false để ngăn người dùng nhập trực tiếp vào TextInput
-            //onChangeText={handleThangNam}
+          //onChangeText={handleThangNam}
           ></TextInput>
           <TouchableOpacity
             onPress={showDatePickers}
@@ -1055,7 +1061,7 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     borderRadius: 10,
     flexDirection: "row",
-    backgroundColor:'white'
+    backgroundColor: 'white'
   },
   roomImageContainer: {
     marginRight: 10,
@@ -1064,17 +1070,17 @@ const styles = StyleSheet.create({
     width: 100,
     height: 115,
     borderRadius: 15,
-    borderColor:'black',
+    borderColor: 'black',
     borderWidth: 1,
-    alignItems:'center'
+    alignItems: 'center'
   },
   roomDetails: {
     flex: 1,
     backgroundColor: "#10DEDE",
     borderRadius: 10,
     width: '80%',
-    justifyContent:'center',
-    textAlign:'center',
+    justifyContent: 'center',
+    textAlign: 'center',
     paddingLeft: 10
   },
   roomInfo: {
