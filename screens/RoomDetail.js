@@ -221,55 +221,20 @@ const RoomDetail = ({ route }) => {
 
       const updatedIds = [...thanhvien, docRef.id]; // Sử dụng spread operator để thêm ID mới vào mảng
       setThanhVien(updatedIds);
-      console.log("add: " + thanhvien);
+      console.log("add: " + docRef.id);
       updateRoomField(getRoom.roomid, "thanhvien", updatedIds);
-      // const nguoi = {
-      //   id: docRef.id,
-      //   name: nguoithue.name,
-      //   phone: nguoithue.phone,
-      //   gender: nguoithue.phone,
-      //   image: nguoithue.image,
-      //   roomid: getRoom.roomid,
-      //   userid: userId,
-      // };
-      // console.log(nguoi);
-      // const newNt = [...nguoithues, nguoithue];
-      // setNguoithues(newNt);
-      // console.log(JSON.stringify(nguoithues));
-
-      const fetchRooms = async () => {
-        const roomCollection = collection(db, "nguoithuephongs");
-        const querySnapshot = await getDocs(roomCollection);
-        const roomList = [];
-        querySnapshot.forEach(async (docs) => {
-          thanhvien.forEach(async (id) => {
-            if (docs.data().userid === userId && id === docs.id) {
-              //////
-              const docRef = doc(db, "rooms", docs.data().roomid);
-              const docSnap = await getDoc(docRef);
-  
-              if (docSnap.exists()) {
-                roomList.push({
-                  id: docs.id,
-                  image: docs.data().image,
-                  name: docs.data().name,
-                  phone: docs.data().phone,
-                  gender: docs.data().gender,
-                  userid: docs.data().userid,
-                  roomid: docs.data().roomid,
-                  tenphong: docSnap.data().tenphong,
-                });
-              } else {
-                // docSnap.data() will be undefined in this case
-                console.log("No such document!");
-              }
-              //////
-            }
-          });
-        });
-        setNguoithues(roomList);
+      const nguoi = {
+        id: docRef.id,
+        name: nguoithue.name,
+        phone: nguoithue.phone,
+        gender: nguoithue.phone,
+        image: nguoithue.image,
+        roomid: getRoom.roomid,
+        userid: userId,
       };
-      fetchRooms();
+      
+      const newNt = [nguoi, ...nguoithues];
+      setNguoithues(newNt);
 
       setIsModalVisibles(false);
     } catch (e) {
@@ -398,7 +363,7 @@ const RoomDetail = ({ route }) => {
     setSelectedMonthYear(formattedDate);
   };
   const deleteNguoiThue = async (item) => {
-    console.log("Chạy")
+    console.log("Chạy: "+item.id)
     const db = getFirestore(app);
     const nguoiThueRef = doc(db, "nguoithuephongs", item.id);
 
@@ -423,8 +388,18 @@ const RoomDetail = ({ route }) => {
     } catch (e) {}
   };
 
-  const updateNguoiThue = ()=>{
-    
+  const xoaPhong = async ()=>{
+    console.log('click: '+getRoom.roomid);
+    const db = getFirestore(app);
+    const roomRef = doc(db, "rooms", getRoom.roomid);
+    try {
+      console.log('try: '+getRoom.roomid);
+      await deleteDoc(roomRef, getRoom.id);
+      console.log('Xóa thành công');
+      handleBackPress();
+    } catch (e) {
+      console.error("Error delete id: ", e);
+    }
   }
 
   return (
@@ -536,13 +511,14 @@ const RoomDetail = ({ route }) => {
       >
         <TouchableOpacity
           style={{
-            backgroundColor: "red",
+            backgroundColor: "blue",
             padding: 12,
             borderRadius: 10,
             borderWidth: 2,
             width: 150,
             height: 50,
             marginLeft: 20,
+            marginRight:20
           }}
           onPress={() => {
             isModalHoaDon(true);
@@ -552,6 +528,26 @@ const RoomDetail = ({ route }) => {
             style={{ textAlign: "center", fontWeight: "bold", color: "white" }}
           >
             Tạo hóa đơn
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{
+            backgroundColor: "red",
+            padding: 12,
+            borderRadius: 10,
+            borderWidth: 2,
+            width: 150,
+            height: 50,
+            marginLeft: 20,
+            
+          }}
+          onPress={()=>{xoaPhong(getRoom)}
+          }
+        >
+          <Text
+            style={{ textAlign: "center", fontWeight: "bold", color: "white" }}
+          >
+            Xóa phòng
           </Text>
         </TouchableOpacity>
       </View>

@@ -24,38 +24,39 @@ export default function Room({ route }) {
   const userId = route.params.userId[0];
   const [searchText, setSearchText] = useState("");
   const navigation = useNavigation();
- 
+
+  const fetchRooms = async () => {
+    const db = getFirestore(app);
+    const roomCollection = collection(db, "rooms");
+    const querySnapshot = await getDocs(roomCollection);
+    const roomList = [];
+    querySnapshot.forEach((doc) => {
+      if (doc.data().userid === userId) {
+        const room = {
+          anhphong: doc.data().anhphong,
+          tenphong: doc.data().tenphong,
+          giaphong: doc.data().giaphong,
+          dientich: doc.data().dientich,
+          mota: doc.data().mota,
+          datcoc: doc.data().datcoc,
+          soluongtoida: doc.data().soluongtoida,
+          userid: doc.data().userid,
+          thanhvien: doc.data().thanhvien,
+          roomid: doc.id,
+        }
+        roomList.push(room);
+      }
+    });
+    setRooms(roomList);
+  };
+
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
-      const fetchRooms = async () => {
-        const db = getFirestore(app);
-        const roomCollection = collection(db, "rooms");
-        const querySnapshot = await getDocs(roomCollection);
-        const roomList = [];
-        querySnapshot.forEach((doc) => {
-          if (doc.data().userid === userId) {
-            const room = {
-              anhphong: doc.data().anhphong,
-              tenphong: doc.data().tenphong,
-              giaphong: doc.data().giaphong,
-              dientich: doc.data().dientich,
-              mota: doc.data().mota,
-              datcoc: doc.data().datcoc,
-              soluongtoida: doc.data().soluongtoida,
-              userid: doc.data().userid,
-              thanhvien: doc.data().thanhvien,
-              roomid:doc.id,
-            }
-            roomList.push(room);
-          }
-        });
-        setRooms(roomList);
-      };
       fetchRooms();
     });
     return unsubscribe;
   }, [navigation]);
-  
+
   function formatPrice(price) {
     price = String(price);
     if (price.length >= 4) {
@@ -81,7 +82,7 @@ export default function Room({ route }) {
     giaphong: "",
     dientich: "",
     mota: "",
-    datcoc:500000,
+    datcoc: 500000,
     soluongtoida: 0,
     userid: userId,
     thanhvien: [],
@@ -95,7 +96,7 @@ export default function Room({ route }) {
       giaphong: "",
       dientich: "",
       mota: "",
-      datcoc:500000,
+      datcoc: 500000,
       soluongtoida: 0,
       userid: userId,
       thanhvien: [],
@@ -108,6 +109,7 @@ export default function Room({ route }) {
     try {
       const docRef = await addDoc(collection(db, "rooms"), room);
       console.log("Thêm phòng thành công: ", docRef.id);
+      fetchRooms();
     } catch (e) {
       console.error("Error adding document: ", e);
     }
@@ -125,7 +127,7 @@ export default function Room({ route }) {
       giaphong: "",
       dientich: "",
       mota: "",
-      datcoc:500000,
+      datcoc: 500000,
       soluongtoida: 0,
       userid: userId,
       thanhvien: [],
