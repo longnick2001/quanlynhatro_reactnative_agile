@@ -236,7 +236,7 @@ export default function RoomList({ route }) {
             </View>
 
             <View style={{flexDirection:'column', justifyContent:'center'}}>
-              <TouchableOpacity onPress={(item) => { xoaNguoiThue(item) }}
+              <TouchableOpacity onPress={() => { xoaNguoiThue(item) }}
               style={{backgroundColor:'yellow', margin:6, padding:6, borderWidth:2, borderColor:'black', borderRadius:10}}>
                 <Text>Xóa</Text>
               </TouchableOpacity>
