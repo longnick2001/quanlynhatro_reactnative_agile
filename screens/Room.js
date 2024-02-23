@@ -147,6 +147,7 @@ export default function Room({ route }) {
       // setImage(result.assets[0].uri);
     }
   };
+  //long 
   const renderIcons = (room) => {
     return (
       <View style={styles.iconContainer}>
