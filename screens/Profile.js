@@ -9,6 +9,7 @@ import {
   Image,
   Button,
   Modal,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, DrawerActions } from "@react-navigation/native";
@@ -28,6 +29,12 @@ const Profile = ({ route }) => {
   const defaultImage = require("../assets/Group.png");
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalVisibles, setIsModalVisibles] = useState(false);
+  // Hàm kiểm tra xem số điện thoại có đúng kiểu không
+  const isValidPhoneNumber = (phoneNumber) => {
+    // Biểu thức chính quy để kiểm tra số điện thoại
+    const phoneNumberRegex = /^[0-9]{10}$/;
+    return phoneNumberRegex.test(phoneNumber);
+  };
 
   const toggleModal = () => {
     setIsModalVisible(!isModalVisible);
@@ -38,31 +45,29 @@ const Profile = ({ route }) => {
     setIsModalVisible(false);
   };
 
-
   const navigation = useNavigation();
   const handleBackPress = () => {
     //navigation.goBack();
-    navigation.navigate('Home', { updatedName: user.name });
+    navigation.navigate("Home", { updatedName: user.name });
   };
 
   const updateUserData = async () => {
     const firestore = getFirestore(app);
     const IDUSER = userId[0];
     try {
-        await updateDoc(doc(firestore, "users", IDUSER), {
-            name: user.name,
-            phone: user.phone,
-            address: user.address,
-            image: user.image,
-        });
-        console.log("User data updated successfully!");
+      await updateDoc(doc(firestore, "users", IDUSER), {
+        name: user.name,
+        phone: user.phone,
+        address: user.address,
+        image: user.image,
+      });
+
+      
+      console.log("User data updated successfully!");
     } catch (error) {
-        console.error("Error updating user data: ", error);
+      console.error("Error updating user data: ", error);
     }
-    
-};
-
-
+  };
 
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
@@ -73,7 +78,7 @@ const Profile = ({ route }) => {
       quality: 1,
     });
     if (!result.canceled) {
-      setUser({ ...user, image: result.assets[0].uri});
+      setUser({ ...user, image: result.assets[0].uri });
       // console.log('base64: '+result.uri.base64);
       setImage(result.assets[0].uri);
     }
@@ -82,8 +87,6 @@ const Profile = ({ route }) => {
     //   setImage(result.assets[0].uri);
     // }
   };
-
-  
 
   const handleNameOnChange = (value) => {
     setUser({ ...user, name: value });
@@ -99,11 +102,19 @@ const Profile = ({ route }) => {
   };
 
   const handleSaveAndClose = () => {
+    if (!user.name || !user.phone || !user.address) {
+      // Hiển thị thông báo hoặc thực hiện các hành động cần thiết khi có trường thông tin trống
+      Alert.alert("Thông báo", "Vui lòng  nhập đủ thông tin!");
+      return; // Dừng hàm nếu có trường thông tin trống
+    };
+    if (!isValidPhoneNumber(user.phone)) {
+      Alert.alert('Thông báo', 'Số điện thoại phải chứa chính xác 10 chữ số.');
+      return;
+    };
+
     updateUserData(user);
     toggleModals();
   };
-
-  
 
   return (
     <SafeAreaView style={styles.container}>
@@ -122,11 +133,7 @@ const Profile = ({ route }) => {
               style={styles.avatar}
             />
           </TouchableOpacity>
-          <TextInput
-            style={styles.input}
-            value={user.name}
-            editable={false}
-          />
+          <TextInput style={styles.input} value={user.name} editable={false} />
           <View
             style={{
               flexDirection: "row",
@@ -141,7 +148,6 @@ const Profile = ({ route }) => {
               style={{ color: "black" }}
               value={user.phone}
               editable={false}
-              
             />
           </View>
           <View
@@ -237,11 +243,10 @@ const Profile = ({ route }) => {
                 borderWidth: 2,
                 textAlign: "center",
               }}
+              placeholder="Tên của bạn"
               value={user.name}
               onChangeText={handleNameOnChange}
-              
-            >
-            </TextInput>
+            ></TextInput>
 
             <TextInput
               style={{
@@ -253,11 +258,10 @@ const Profile = ({ route }) => {
                 borderWidth: 2,
                 textAlign: "center",
               }}
+              placeholder="Số điện thoại"
               value={user.phone}
               onChangeText={handleOnChangePhone}
-              
-            >
-            </TextInput>
+            ></TextInput>
             <TextInput
               style={{
                 width: "100%",
@@ -268,11 +272,10 @@ const Profile = ({ route }) => {
                 borderWidth: 2,
                 textAlign: "center",
               }}
+              placeholder="Địa chỉ"
               value={user.address}
               onChangeText={handleOnChangeAddress}
-              
-            >
-            </TextInput>
+            ></TextInput>
             <View
               style={{
                 flexDirection: "row",
